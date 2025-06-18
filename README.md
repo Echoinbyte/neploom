@@ -122,16 +122,13 @@ graph TD
 
 
 ### Feature 1: Creating a Loom with Interactive Elements
-*(Shows the process of a NepLer creating a new Loom and adding a quiz or flashcards)*
-`![Creating a Loom GIF](https://github.com/Echoinbyte/NepLoom/blob/main/public/videos/interactive-elements.mp4)`
+![Creating a Loom GIF](https://ik.imagekit.io/echoinbyte/interactive-elements.gif)
 
 ### Feature 2: Engaging with Gamified Learning
-*(Shows a user playing "Blast" or "Match" within a Loom)*
-`![Interactive Learning GIF](https://github.com/Echoinbyte/NepLoom/blob/main/public/videos/gamified-learning.mp4)`
+![Interactive Learning GIF](https://ik.imagekit.io/echoinbyte/gamified-learning.gif)
 
 ### Feature 3: Profile Customization and Streaks
-*(Shows a user customizing their profile and their streak count increasing)*
-`![Profile Customization GIF](https://github.com/Echoinbyte/NepLoom/blob/main/public/videos/customize-profile.mp4)`
+![Profile Customization GIF](https://ik.imagekit.io/echoinbyte/customize-profile.gif)
 
 ## 🛠️ Getting Started
 
@@ -258,15 +255,14 @@ To keep your local fork and branches up-to-date with the main NepLoom repository
     ```
 
 ### Coding Standards
-*(Placeholder: Add any specific coding standards, linting rules (e.g., "Follow ESLint rules defined in `eslint.config.mjs`"), or style guides here.)*
+
 -   Follow ESLint rules (see `eslint.config.mjs`).
 -   Write clear, maintainable code.
 -   ...
 
 ## 📜 License
 
-*(Placeholder: Specify your project's license here, e.g., MIT License. If you have a LICENSE file, you can refer to it.)*
-Distributed under the MIT License. See `LICENSE.md` for more information (assuming you will create a LICENSE.md file).
+Distributed under the MIT License.
 
 ---
 
