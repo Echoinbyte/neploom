@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -9,7 +9,10 @@ const fontSans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NepLoom",
+  title: {
+    default: "NepLoom",
+    template: "%s | NepLoom",
+  },
   description:
     "NepLoom is an Ed-tech social blogging platform where creators craft gamified blogs called Looms. Learn smarter with interactive tools like quizzes, flashcards, and AI-powered features. Make education free, fun, and accessible for everyone.",
   keywords: [
@@ -77,21 +80,29 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/manifest.json",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ef4444" },
-    { media: "(prefers-color-scheme: dark)", color: "#ef4444" },
-  ],
-  colorScheme: "light dark",
-  viewport: "width=device-width, initial-scale=1",
   verification: {
     // google: "your-google-site-verification-code",
     // yandex: "your-yandex-verification-code",
     // bing: "your-bing-site-verification-code",
   },
   alternates: {
-    canonical: process.env.NEXT_PUBLIC_API_BASE_URL_PROD || "https://neploom.tech",
+    canonical:
+      process.env.NEXT_PUBLIC_API_BASE_URL_PROD || "https://neploom.tech",
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_API_BASE_URL_PROD || "https://neploom.tech"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_API_BASE_URL_PROD || "https://neploom.tech"
+  ),
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: false,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
 };
 
 export default function RootLayout({
@@ -101,11 +112,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${fontSans.variable} antialiased`}
-      >
-        {children}
-      </body>
+      <body className={`${fontSans.variable} antialiased`}>{children}</body>
     </html>
   );
 }
