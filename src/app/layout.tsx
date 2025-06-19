@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     default: "NepLoom",
     template: "%s | NepLoom",
   },
+
   description:
     "NepLoom is an Ed-tech social blogging platform where creators craft gamified blogs called Looms. Learn smarter with interactive tools like quizzes, flashcards, and AI-powered features. Make education free, fun, and accessible for everyone.",
   keywords: [
@@ -112,7 +113,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${fontSans.variable} antialiased`}>{children}</body>
+      <body
+        className={`${fontSans.variable} antialiased max-w-screen overflow-x-hidden`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

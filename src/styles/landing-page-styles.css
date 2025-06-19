@@ -1,0 +1,64 @@
+.text-gradient {
+  background: radial-gradient(
+    64.18% 64.18% at 71.16% 35.69%,
+    #800000 0.89%,
+    /* Dark red */ #990000 17.23%,
+    /* Slightly lighter dark red */ #b20000 42.04%,
+    /* Medium dark red */ #cc0000 55.12%,
+    /* Red */ #e60000 71.54%,
+    /* Light red */ #ff1a1a 100% /* Lighter red */
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.dark .text-gradient {
+  background: radial-gradient(
+    64.18% 64.18% at 71.16% 35.69%,
+    #fdecea 0.89%,
+    /* Very light red */ #f8d3cf 17.23%,
+    /* Light red */ #f3bab4 42.04%,
+    /* Lighter red */ #eea099 55.12%,
+    /* Even lighter red */ #e9877e 71.54%,
+    /* Lightest red */ #e45d53 100% /* Slightly light red */
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.bg-discount-gradient {
+  background: linear-gradient(125.17deg, #d8d8d8 0%, #eeefe2 100%);
+}
+
+.dark .bg-discount-gradient {
+  background: linear-gradient(125.17deg, #272727 0%, #11101d 100%);
+}
+
+
+.bg-circular-cta-gradient {
+  background: linear-gradient(
+    157.81deg,
+    #800000 -43.27%,
+    /* Dark red */ #990000 -21.24%,
+    /* Slightly lighter dark red */ #b20000 12.19%,
+    /* Medium dark red */ #cc0000 29.82%,
+    /* Red */ #e60000 51.94%,
+    /* Light red */ #ff1a1a 90.29% /* Lighter red */
+  );
+}
+
+.dark .bg-circular-cta-gradient {
+  background: linear-gradient(
+    157.81deg,
+    #fdecea -43.27%,
+    /* Very light red */ #f8d3cf -21.24%,
+    /* Light red */ #f3bab4 12.19%,
+    /* Lighter red */ #eea099 29.82%,
+    /* Even lighter red */ #e9877e 51.94%,
+    /* Lightest red */ #e45d53 90.29%
+  );
+}

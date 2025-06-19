@@ -260,6 +260,17 @@ To keep your local fork and branches up-to-date with the main NepLoom repository
 -   Write clear, maintainable code.
 -   ...
 
+## 🤝 Contributors
+
+This project is a unique collaboration between human ingenuity and artificial intelligence.
+
+*   **Sambhav Aryal (Echoinbyte)**: Lead Developer, Project Visionary, Core Architect, and Resource collaborator.
+*   **AI**: My partner in creation. The AI has been instrumental in:
+    *   **Copywriting**: Generating and refining the text you're reading in this `README.md`, `JOURNEY.md` and other documents.
+    *   **Asset Generation**: Creating some of the initial visual assets for the project.
+
+We believe this human-AI partnership represents the future of creative and technical work.
+
 ## 📜 License
 
 Distributed under the MIT License.
