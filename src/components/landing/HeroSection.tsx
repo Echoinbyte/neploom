@@ -11,7 +11,7 @@ import { heroIcons } from "@/config/constants/landing-page";
 import CircularCallToAction from "@/components/shared/CircularCallToAction";
 import Notification from "@/design/landing/notification";
 import Generating from "@/design/landing/generating";
-import Section from "./Section";
+import Section from "@/components/landing/Section";
 
 const HeroSection = () => {
   const parallaxRef = useRef<HTMLDivElement>(null);

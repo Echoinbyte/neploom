@@ -1,5 +1,5 @@
 import { stats } from "@/config/constants/landing-page";
-import Section from "./Section";
+import Section from "@/components/landing/Section";
 
 const Stats = () => (
   <Section

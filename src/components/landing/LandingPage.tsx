@@ -1,6 +1,5 @@
 import "@/styles/landing-page-styles.css"
 import MaxWidthWrapper from "@/components/shared/MaxWidthWrapper";
-// import Services from "./Pages/Services";
 import Stats from "@/components/landing/Stats";
 import Benefits from "@/components/landing/Benefits";
 import Collaboration from "@/components/landing/Collaboration";

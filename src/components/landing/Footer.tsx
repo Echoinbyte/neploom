@@ -1,22 +1,22 @@
 import Link from "next/link";
 import Image from "next/image";
-import Section from "./Section";
+import Section from "@/components/landing/Section";
 
 const legalLinks = [
   {
     id: "terms",
     label: "Terms",
-    href: "/terms",
+    href: "/legal/terms",
   },
   {
     id: "privacy",
     label: "Privacy Policy",
-    href: "/privacy",
+    href: "/legal/privacy",
   },
   {
     id: "cookies",
     label: "Cookie Policy",
-    href: "/cookies",
+    href: "/legal/cookies",
   },
 ];
 
