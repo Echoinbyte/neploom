@@ -11,3 +11,7 @@ The idea is now taking shape. I started coding today, setting up the basic proje
 ### 19th June, 2025
 
 Woke up this morning with a clear goal: complete the landing page and implement the authentication system. These are the gateways to the NepLoom experience, and getting them right is essential. The plan is to create a seamless and secure entry point for our future users. The day is young, and the motivation is high. Let's get to it.
+
+### 20th June, 2025
+
+Planned to add some hooks to the app and started planning the models for NepLoom. However, I became very busy with household responsibilities today, so only some of the hooks were partially completed. Progress was slower than expected, but the vision remains strong. Also, the FIX IT challenge from HackaTime kept me busy building a script to make blogging website navigation easier. This side project took up a good portion of the day, but it was a valuable learning experience and could inspire future features for NepLoom.
