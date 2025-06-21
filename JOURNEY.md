@@ -15,3 +15,8 @@ Woke up this morning with a clear goal: complete the landing page and implement 
 ### 20th June, 2025
 
 Planned to add some hooks to the app and started planning the models for NepLoom. However, I became very busy with household responsibilities today, so only some of the hooks were partially completed. Progress was slower than expected, but the vision remains strong. Also, the FIX IT challenge from HackaTime kept me busy building a script to make blogging website navigation easier. This side project took up a good portion of the day, but it was a valuable learning experience and could inspire future features for NepLoom.
+
+### 21st June, 2025
+
+Today, I added the UI and UX for the authentication page, incorporating both login and register options. The design features a space-like aesthetic that aligns perfectly with the NepLoom theme. This interface captures the cosmic, exploratory spirit of our platform while ensuring clean usability. This marks a significant step forward in creating the user onboarding experience, welcoming learners into their educational journey through the cosmos of knowledge.
+
