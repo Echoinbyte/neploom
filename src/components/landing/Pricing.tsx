@@ -39,7 +39,7 @@ const Pricing = () => {
             Get started with NepLoom For Free
           </TagLine>
           <div className="w-full flex justify-center items-center">
-            <Link href={"/sign-up"}>
+            <Link href={"/authentication"}>
               <CircularCallToAction cta="Learn Now!" />
             </Link>
           </div>

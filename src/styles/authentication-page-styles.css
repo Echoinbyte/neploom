@@ -1,0 +1,663 @@
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} */
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.forms-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.signin-signup {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: 75%;
+  width: 50%;
+  transition: 1s 0.7s ease-in-out;
+  display: grid;
+  grid-template-columns: 1fr;
+  z-index: 5;
+}
+
+form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0rem 5rem;
+  transition: all 0.2s 0.7s;
+  overflow: hidden;
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+.extra-sign-in-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+form.sign-up-form {
+  opacity: 0;
+  z-index: 1;
+}
+
+form.sign-in-form {
+  z-index: 2;
+}
+
+.title {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+}
+
+.input-field {
+  max-width: 380px;
+  min-width: 380px;
+  width: 100%;
+  margin: 10px 0;
+  height: 55px;
+  border-radius: 55px;
+  display: grid;
+  grid-template-columns: 15% 85%;
+  padding: 0 0.4rem;
+  position: relative;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  transition: border-color 0.2s ease;
+}
+
+.input-field:focus-within {
+  border-color: var(--primary);
+}
+
+.input-field .icon {
+  margin: auto;
+}
+
+.input-field input {
+  background: none;
+  outline: none;
+  border: none;
+  line-height: 1;
+  font-weight: 600;
+  font-size: 1.1rem;
+  width: 100%;
+  color: var(--foreground);
+}
+
+.input-field input:focus {
+  outline: none;
+  background: transparent !important;
+}
+
+.input-field input::-webkit-input-placeholder {
+  color: #b7b7b7 !important;
+  font-weight: 500;
+}
+
+.input-field input::placeholder {
+  color: #b7b7b7 !important;
+  font-weight: 500;
+}
+
+/* Dark mode placeholder colors */
+.dark .input-field input::-webkit-input-placeholder {
+  color: #8f8f8f !important;
+  font-weight: 500;
+}
+
+.dark .input-field input::placeholder {
+  color: #8f8f8f !important;
+  font-weight: 500;
+}
+
+/* Prevent autofill styling and suggestion overlay */
+.input-field input:-webkit-autofill,
+.input-field input:-webkit-autofill:hover,
+.input-field input:-webkit-autofill:focus,
+.input-field input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  transition: background-color 5000s ease-in-out 0s;
+  color: var(--foreground) !important;
+  caret-color: var(--foreground) !important;
+}
+
+/* Additional autofill prevention for suggestions */
+.input-field input:autofill {
+  background: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: var(--foreground) !important;
+}
+
+/* Force text color when selecting from suggestions */
+.input-field input:-webkit-autofill::selection {
+  background: rgba(59, 130, 246, 0.3) !important;
+  color: var(--foreground) !important;
+}
+
+/* Stronger autofill text forcing for suggestions */
+.input-field input:-webkit-autofill,
+.input-field input[data-webkit-autofill] {
+  -webkit-text-fill-color: var(--foreground) !important;
+  color: var(--foreground) !important;
+}
+
+/* Additional protection for browser suggestion selection */
+.input-field input:-webkit-autofill:focus,
+.input-field input:-webkit-autofill:active,
+.input-field input:-webkit-autofill:valid,
+.input-field input[autocomplete]:focus,
+.input-field input[autocomplete]:active {
+  -webkit-text-fill-color: var(--foreground) !important;
+  color: var(--foreground) !important;
+  background: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+/* Force text color when selecting suggestions from dropdown */
+.input-field input:not(:placeholder-shown) {
+  color: var(--foreground) !important;
+}
+
+/* Override any browser suggestion styling */
+.input-field input::-webkit-textfield-decoration-container {
+  color: inherit !important;
+}
+
+/* Remove blue suggestion overlay and credentials button */
+.input-field input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+/* Additional input text protection for all states */
+.input-field input,
+.input-field input:focus,
+.input-field input:active,
+.input-field input:valid,
+.input-field input[type="text"],
+.input-field input[type="email"],
+.input-field input[type="password"] {
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+}
+
+.social-text {
+  padding: 0.7rem 0;
+  font-size: 1rem;
+  color: var(--muted-foreground);
+}
+
+.social-media {
+  display: flex;
+  justify-content: center;
+}
+
+.social-icon {
+  height: 46px;
+  width: 46px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0.45rem;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.social-icon:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.svg {
+  height: 75%;
+  width: 75%;
+}
+
+.btn {
+  width: 150px;
+  background-color: var(--primary);
+  border: none;
+  outline: none;
+  height: 49px;
+  border-radius: 49px;
+  color: var(--primary-foreground);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: 0.5s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:hover {
+  background-color: var(--primary);
+}
+.panels-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.container:before {
+  content: "";
+  position: absolute;
+  height: 2000px;
+  width: 2000px;
+  top: -10%;
+  right: 48%;
+  transform: translateY(-50%);
+  background-image: linear-gradient(
+    -45deg,
+    #eb4b4b 0%,
+    #fe6e6e 70%,
+    #ff9a56 100%
+  );
+  box-shadow: 0 0 100px rgba(235, 75, 75, 0.3);
+  transition: 1.8s ease-in-out;
+  border-radius: 50%;
+  z-index: 6;
+}
+
+/* Dark mode red panel - darker colors */
+.dark .container:before {
+  background-image: linear-gradient(
+    -45deg,
+    #b91c1c 0%,
+    #dc2626 70%,
+    #ef4444 100%
+  );
+  box-shadow: 0 0 100px rgba(185, 28, 28, 0.4);
+}
+
+.image {
+  width: 100%;
+  transition: transform 1.1s ease-in-out;
+  transition-delay: 0.4s;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-around;
+  text-align: center;
+  z-index: 6;
+}
+
+.left-panel {
+  pointer-events: all;
+  padding: 3rem 17% 2rem 12%;
+}
+
+.right-panel {
+  pointer-events: none;
+  padding: 3rem 12% 2rem 17%;
+}
+
+.panel .content {
+  color: #fff;
+  transition: transform 0.9s ease-in-out;
+  transition-delay: 0.6s;
+}
+
+.panel h3 {
+  font-weight: 600;
+  line-height: 1;
+  font-size: 1.5rem;
+  color: var(--foreground);
+}
+
+.panel p {
+  font-size: 0.95rem;
+  padding: 0.7rem 0;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* Dark mode specific description color */
+.dark .panel p {
+  color: var(--foreground);
+}
+
+.btn.transparent {
+  margin: 0;
+  background: none;
+  border: 2px solid var(--foreground);
+  width: 130px;
+  height: 41px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--foreground);
+}
+
+/* Dark mode specific transparent button color */
+.dark .btn.transparent {
+  border: 2px solid var(--foreground);
+  color: var(--foreground);
+}
+
+.right-panel .image,
+.right-panel .content {
+  transform: translateX(800px);
+}
+
+/* ANIMATION */
+
+.container.sign-up-mode:before {
+  transform: translate(100%, -50%);
+  right: 52%;
+}
+
+.container.sign-up-mode .left-panel .image,
+.container.sign-up-mode .left-panel .content {
+  transform: translateX(-800px);
+}
+
+.container.sign-up-mode .signin-signup {
+  left: 25%;
+}
+
+.container.sign-up-mode form.sign-up-form {
+  opacity: 1;
+  z-index: 2;
+}
+
+.container.sign-up-mode form.sign-in-form {
+  opacity: 0;
+  z-index: 1;
+}
+
+.container.sign-up-mode .right-panel .image,
+.container.sign-up-mode .right-panel .content {
+  transform: translateX(0%);
+}
+
+.container.sign-up-mode .left-panel {
+  pointer-events: none;
+}
+
+.container.sign-up-mode .right-panel {
+  pointer-events: all;
+}
+
+@media (max-width: 870px) {
+  .container {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  .signin-signup {
+    width: 100%;
+    top: 95%;
+    transform: translate(-50%, -100%);
+    transition: 1s 0.8s ease-in-out;
+  }
+
+  .signin-signup,
+  .container.sign-up-mode .signin-signup {
+    left: 50%;
+  }
+
+  .panels-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 2fr 1fr;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .panel {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 2.5rem 8%;
+    grid-column: 1 / 2;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .right-panel {
+    grid-row: 3 / 4;
+  }
+
+  .left-panel {
+    grid-row: 1 / 2;
+  }
+
+  .image {
+    width: 200px;
+    transition: transform 0.9s ease-in-out;
+    transition-delay: 0.6s;
+  }
+
+  .panel .content {
+    padding-right: 15%;
+    transition: transform 0.9s ease-in-out;
+    transition-delay: 0.8s;
+  }
+
+  .panel h3 {
+    font-size: 1.2rem;
+  }
+
+  .panel p {
+    font-size: 0.8rem;
+    padding: 0.5rem 0;
+    line-height: 1.4;
+  }
+
+  .btn.transparent {
+    width: 110px;
+    height: 35px;
+    font-size: 0.7rem;
+  }
+
+  .container:before {
+    width: 1500px;
+    height: 1500px;
+    transform: translateX(-50%);
+    left: 30%;
+    bottom: 68%;
+    right: initial;
+    top: initial;
+    transition: 2s ease-in-out;
+  }
+
+  .container.sign-up-mode:before {
+    transform: translate(-50%, 100%);
+    bottom: 32%;
+    right: initial;
+  }
+
+  .container.sign-up-mode .left-panel .image,
+  .container.sign-up-mode .left-panel .content {
+    transform: translateY(-300px);
+  }
+
+  .container.sign-up-mode .right-panel .image,
+  .container.sign-up-mode .right-panel .content {
+    transform: translateY(0px);
+  }
+
+  .right-panel .image,
+  .right-panel .content {
+    transform: translateY(300px);
+  }
+
+  .container.sign-up-mode .signin-signup {
+    top: 5%;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 570px) {
+  form {
+    padding: 0 1.5rem;
+  }
+
+  .image {
+    display: none;
+  }
+  .panel .content {
+    padding: 0.5rem 1rem;
+  }
+  .container {
+    padding: 1.5rem;
+  }
+
+  .container:before {
+    bottom: 72%;
+    left: 50%;
+  }
+
+  .container.sign-up-mode:before {
+    bottom: 28%;
+    left: 50%;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 871px) and (max-width: 1024px) {
+  .container {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  .signin-signup {
+    left: 70%;
+    width: 55%;
+  }
+
+  .container.sign-up-mode .signin-signup {
+    left: 30%;
+  }
+
+  .panels-container {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  .panel {
+    padding: 2rem 5%;
+  }
+
+  .left-panel {
+    padding: 3rem 10% 2rem 8%;
+  }
+
+  .right-panel {
+    padding: 3rem 8% 2rem 10%;
+  }
+
+  .image {
+    width: 85%;
+    max-width: 300px;
+  }
+}
+
+/* Cosmic particle effects - visible in both light and dark themes */
+.forms-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(2px 2px at 20px 30px, #94a3b8, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(148, 163, 184, 0.7), transparent),
+    radial-gradient(1px 1px at 90px 40px, #64748b, transparent),
+    radial-gradient(
+      1px 1px at 130px 80px,
+      rgba(100, 116, 139, 0.8),
+      transparent
+    ),
+    radial-gradient(
+      2px 2px at 160px 30px,
+      rgba(148, 163, 184, 0.9),
+      transparent
+    );
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: sparkle 20s linear infinite;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Dark theme sparkle effects */
+.dark .forms-container::before {
+  background-image: radial-gradient(2px 2px at 20px 30px, #e2e8f0, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(
+      1px 1px at 130px 80px,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    ),
+    radial-gradient(
+      2px 2px at 160px 30px,
+      rgba(255, 255, 255, 0.9),
+      transparent
+    );
+  opacity: 0.8;
+}
+
+@keyframes sparkle {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(200px);
+  }
+}

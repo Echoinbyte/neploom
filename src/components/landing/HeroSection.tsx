@@ -44,7 +44,7 @@ const HeroSection = () => {
               Expand the <span className="text-gradient">Knowledge</span>
             </h1>
             <div className="sm:flex hidden md:mr-4 mr-0">
-              <Link href={"/sign-up"}>
+              <Link href={"/authentication"}>
                 <CircularCallToAction cta="Get Started!" />
               </Link>
             </div>

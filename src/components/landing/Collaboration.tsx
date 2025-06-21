@@ -41,7 +41,7 @@ const Collaboration = () => {
             ))}
           </ul>
 
-          <Link href={"/sign-up"} className="mt-[10px] cursor-pointer">
+          <Link href={"/authentication"} className="mt-[10px] cursor-pointer">
             <button className="c-cursor-hover py-6 px-6 font-medium text-[18px] text-white dark:text-black bg-[#ef4444] rounded-[10px] outline-none cursor-pointer">
               NepLoom is for Everything
             </button>
