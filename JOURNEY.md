@@ -20,3 +20,7 @@ Planned to add some hooks to the app and started planning the models for NepLoom
 
 Today, I added the UI and UX for the authentication page, incorporating both login and register options. The design features a space-like aesthetic that aligns perfectly with the NepLoom theme. This interface captures the cosmic, exploratory spirit of our platform while ensuring clean usability. This marks a significant step forward in creating the user onboarding experience, welcoming learners into their educational journey through the cosmos of knowledge.
 
+### 22nd June, 2025
+
+Added the Navbar, dark mode compatibility for the App, theme toggler button, context menu for searching and navigating app. Today was focused on creating a seamless navigation experience with a beautiful command menu that supports VS Code-like search features including direct path navigation (> or goto:). The navbar now features a glassy, space-themed aesthetic that perfectly complements our cosmic design language, while the theme toggler ensures accessibility across different lighting conditions.
+

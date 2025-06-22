@@ -61,14 +61,9 @@ export default function CommandBox({ closeMenu }: { closeMenu: () => void }) {
       : inputValue.replace("goto:", "").trim()
     : "";
 
-  const isSearchProjects = inputValue.startsWith("%");
-  const projectQuery = isSearchProjects ? inputValue.slice(1) : "";
-  const isSearchUsers = inputValue.startsWith("@");
-  const userQuery = isSearchUsers ? inputValue.slice(1) : "";
-
   // Filter GroupOptions based on input when not using special prefixes
   const filteredGroupOptions = useMemo(() => {
-    if (isGoToPath || isSearchProjects || isSearchUsers || !inputValue.trim()) {
+    if (isGoToPath || !inputValue.trim()) {
       return GroupOptions;
     }
 
@@ -80,7 +75,7 @@ export default function CommandBox({ closeMenu }: { closeMenu: () => void }) {
           option.value.toLowerCase().includes(inputValue.toLowerCase())
       ),
     })).filter((group) => group.Options.length > 0);
-  }, [GroupOptions, inputValue, isGoToPath, isSearchProjects, isSearchUsers]);
+  }, [GroupOptions, inputValue, isGoToPath]);
 
   return (
     <Command
@@ -107,7 +102,7 @@ export default function CommandBox({ closeMenu }: { closeMenu: () => void }) {
       </div>
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        {isGoToPath && path && (
+        {isGoToPath && (
           <CommandGroup heading="Navigation">
             <CommandItem
               onSelect={() => handleSelect(path)}
@@ -118,21 +113,7 @@ export default function CommandBox({ closeMenu }: { closeMenu: () => void }) {
             </CommandItem>
           </CommandGroup>
         )}
-        {isSearchProjects && (
-          <CommandGroup heading={`Projects matching "${projectQuery}"`}>
-            <CommandItem>Project 1</CommandItem>
-            <CommandItem>Project 2</CommandItem>
-          </CommandGroup>
-        )}
-        {isSearchUsers && (
-          <CommandGroup heading={`Users matching "${userQuery}"`}>
-            <CommandItem>User 1</CommandItem>
-            <CommandItem>User 2</CommandItem>
-          </CommandGroup>
-        )}{" "}
         {!isGoToPath &&
-          !isSearchProjects &&
-          !isSearchUsers &&
           filteredGroupOptions.map((GroupOption, index) => (
             <React.Fragment key={`${GroupOption.Heading}-${index}`}>
               <CommandGroup heading={GroupOption.Heading}>
