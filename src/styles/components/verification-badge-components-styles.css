@@ -1,0 +1,49 @@
+.light .SupremeStyles {
+  color: #d10000;
+  text-shadow: 0px 0px 1px rgba(209, 0, 0, 0.3);
+}
+
+.dark .SupremeStyles {
+  color: #ff5252;
+  text-shadow: 0px 0px 1px rgba(255, 82, 82, 0.4);
+}
+
+.light .EminentStyles {
+  color: #1a56db;
+  text-shadow: 0px 0px 1px rgba(26, 86, 219, 0.3);
+}
+
+.dark .EminentStyles {
+  color: #60a5fa;
+  text-shadow: 0px 0px 1px rgba(96, 165, 250, 0.4);
+}
+
+.light .MajesticStyles {
+  color: #7e22ce;
+  text-shadow: 0px 0px 1px rgba(126, 34, 206, 0.3);
+}
+
+.dark .MajesticStyles {
+  color: #a855f7;
+  text-shadow: 0px 0px 1px rgba(168, 85, 247, 0.4);
+}
+
+.light .VirtuousStyles {
+  color: #16a34a;
+  text-shadow: 0px 0px 1px rgba(22, 163, 74, 0.3);
+}
+
+.dark .VirtuousStyles {
+  color: #4ade80;
+  text-shadow: 0px 0px 1px rgba(74, 222, 128, 0.4);
+}
+
+.light .AuroraStyles {
+  color: #475569;
+  text-shadow: 0px 0px 1px rgba(71, 85, 105, 0.3);
+}
+
+.dark .AuroraStyles {
+  color: #94a3b8;
+  text-shadow: 0px 0px 1px rgba(148, 163, 184, 0.4);
+}

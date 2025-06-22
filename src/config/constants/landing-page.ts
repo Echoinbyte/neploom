@@ -13,7 +13,7 @@ export const notificationImages = [
 export const stats = [
   {
     id: "stats-1",
-    title: "User Active",
+    title: "Loomers Active",
     value: "360000+",
   },
   {

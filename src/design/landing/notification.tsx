@@ -38,11 +38,11 @@ const Notification = ({
               >
                 <Image
                   priority
-                  src={"/placeholder-user.jpg"}
+                  src={"/placeholder-loomer.jpg"}
                   className="w-full"
                   width={20}
                   height={20}
-                  alt={`Users ${index + 1} - Image`}
+                  alt={`Loomers ${index + 1} - Image`}
                   // loading="lazy"
                 />
                 {/* <Icon className="w-5 h-5"></Icon> */}

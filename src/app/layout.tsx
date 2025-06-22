@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/navigation/Navbar";
+import { LoomerProvider } from "@/context/LoomerContext";
+import SessionProvider from "@/providers/SessionProvider";
+import { ThemeProvider } from "next-themes";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -116,7 +120,14 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} antialiased max-w-screen overflow-x-hidden`}
       >
-        {children}
+        <SessionProvider>
+          <LoomerProvider>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+              <Navbar />
+              {children}
+            </ThemeProvider>
+          </LoomerProvider>
+        </SessionProvider>
       </body>
     </html>
   );

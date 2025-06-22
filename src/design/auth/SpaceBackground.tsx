@@ -1,4 +1,4 @@
-import "./SpaceBackground.css";
+import "@/styles/design/space-background-design-styles.css";
 
 export default function SpaceBackground() {
   return (
