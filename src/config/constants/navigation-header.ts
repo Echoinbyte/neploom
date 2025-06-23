@@ -6,14 +6,24 @@ export const CREATION_CATEGORIES = [
     value: "categories" as const,
     featured: [
       {
-        name: "Technology",
-        href: `/creation?tag=technology`,
-        imageSrc: "/nav/technology/technology.jpg",
+        name: "Looms",
+        href: `/home?category=looms`,
+        imageSrc: "/nav/looms.jpg",
       },
       {
-        name: "Business",
-        href: "/creation?tag=business",
-        imageSrc: "/nav/business/business.jpg",
+        name: "Quicks",
+        href: "/home?category=quicks",
+        imageSrc: "/nav/quicks.jpg",
+      },
+      {
+        name: "Comets",
+        href: "/home?category=comets",
+        imageSrc: "/nav/comets.jpg",
+      },
+      {
+        name: "Novas",
+        href: "/home?category=novas",
+        imageSrc: "/nav/novas.jpg",
       },
     ],
   },
@@ -32,5 +42,5 @@ export const DEFAULT_LOOMER_DATA: Loomer = {
       aura: 0,
     },
   },
-  isVerified: false
+  isVerified: false,
 };

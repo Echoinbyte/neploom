@@ -24,3 +24,7 @@ Today, I added the UI and UX for the authentication page, incorporating both log
 
 Added the Navbar, dark mode compatibility for the App, theme toggler button, context menu for searching and navigating app. Today was focused on creating a seamless navigation experience with a beautiful command menu that supports VS Code-like search features including direct path navigation (> or goto:). The navbar now features a glassy, space-themed aesthetic that perfectly complements our cosmic design language, while the theme toggler ensures accessibility across different lighting conditions.
 
+### 23rd June, 2025
+
+Aim at building the authentication system for NepLoom and also determining the models for the supabase table for Loomers, Loom, Galaxy and Nebula table. Today's focus is on laying the foundation for user management and content organization. The authentication system will be the gateway for learners to access their personalized cosmic journey, while the database models will define how knowledge is structured within our educational universe. The Loomers table will manage user profiles, Loom will contain individual learning units, Galaxy will group related content, and Nebula will represent broader subject areas - creating a hierarchical knowledge structure that mirrors the vastness of space.
+

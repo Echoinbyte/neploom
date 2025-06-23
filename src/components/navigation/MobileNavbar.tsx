@@ -5,15 +5,21 @@ import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { User as Loomer } from "next-auth";
+import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 
 const MobileNav = () => {
   const { data: session } = useSession();
   const loomer: Loomer = session?.user;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const pathname = usePathname();
+  const mobileNavRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(mobileNavRef as React.RefObject<HTMLElement>, () =>
+    setIsOpen(false)
+  );
 
   // whenever we click an item in the menu and navigate away, we want to close the menu
   useEffect(() => {
@@ -49,10 +55,9 @@ const MobileNav = () => {
     <div>
       <div className="relative z-40 lg:hidden">
         <div className="fixed inset-0 bg-black bg-opacity-25" />
-      </div>
-
+      </div>{" "}
       <div className="fixed overflow-y-scroll overscroll-y-none inset-0 z-40 flex">
-        <div className="w-4/5">
+        <div className="w-4/5" ref={mobileNavRef}>
           <div className="relative flex w-full max-w-sm flex-col overflow-y-auto bg-white dark:bg-black pb-12 shadow-xl">
             <div className="flex px-4 pb-2 pt-5">
               <button

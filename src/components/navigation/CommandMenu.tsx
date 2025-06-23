@@ -79,7 +79,7 @@ export default function CommandBox({ closeMenu }: { closeMenu: () => void }) {
 
   return (
     <Command
-      className="w-[90vw] sm:w-[74vw] lg:w-[46vw] rounded-lg pt-1 pb-4 px-1 glassmorphism !bg-white/99 !dark:bg-black/99"
+      className="w-[90vw] sm:w-[74vw] lg:w-[46vw] rounded-lg pt-1 pb-4 px-1 bg-background dark:bg-background"
       shouldFilter={false}
     >
       {" "}

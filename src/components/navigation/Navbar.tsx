@@ -58,8 +58,7 @@ const Navbar = () => {
     <>
       <div
         className={cn(
-          "sticky z-[1502] top-0 inset-x-0 h-14 navbar",
-          "glassmorphism"
+          "sticky z-[1502] top-0 inset-x-0 h-14 navbar bg-background dark:bg-background"
         )}
       >
         <header className="relative">
@@ -90,7 +89,7 @@ const Navbar = () => {
                   >
                     <button
                       onClick={() => setMenuVisible((prev) => !prev)}
-                      className="inline-flex items-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input hover:bg-accent hover:text-accent-foreground px-4 py-2 relative h-8 w-full justify-start rounded-[0.5rem] bg-muted/50 text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64"
+                      className="inline-flex items-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input hover:bg-accent hover:text-accent-foreground px-4 py-2 relative h-8 w-full justify-start rounded-[0.5rem] bg-muted/50 text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64 cursor-pointer"
                     >
                       <span className="hidden lg:inline-flex items-center gap-2">
                         <IoNavigate />
