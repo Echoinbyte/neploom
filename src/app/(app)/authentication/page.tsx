@@ -1,8 +1,7 @@
 "use client";
 
 import "@/styles/authentication-page-styles.css";
-import log from "../../../../public/auth/log.svg";
-import reg from "../../../../public/auth/register.svg";
+import { log, reg } from "@/config/imageImports";
 import { MdOutlineMail } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
 import Image from "next/image";
@@ -122,7 +121,14 @@ function AuthContent() {
               </p>
               <ModeToggle mode="signup">Sign up</ModeToggle>
             </div>
-            <Image priority src={log} className="image" alt="Logging" />
+            <Image
+              priority
+              src={log}
+              className="image"
+              alt="Logging"
+              width={1140}
+              height={787}
+            />
           </div>
           <div className="panel right-panel">
             <div className="content">
@@ -130,7 +136,14 @@ function AuthContent() {
               <p>Just sign in and continue your journey with us</p>
               <ModeToggle mode="signin">Sign in</ModeToggle>
             </div>
-            <Image priority src={reg} className="image" alt="Register" />{" "}
+            <Image
+              priority
+              src={reg}
+              className="image"
+              alt="Register"
+              width={999}
+              height={797}
+            />{" "}
           </div>
         </div>
       </div>

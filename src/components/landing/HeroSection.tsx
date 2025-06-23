@@ -13,6 +13,12 @@ import Notification from "@/design/landing/notification";
 import Generating from "@/design/landing/generating";
 import Section from "@/components/landing/Section";
 
+// Centralized image imports
+import {
+  expandKnowledgeImage,
+  uploadingLoomImage,
+} from "@/config/imageImports";
+
 const HeroSection = () => {
   const parallaxRef = useRef<HTMLDivElement>(null);
 
@@ -60,10 +66,11 @@ const HeroSection = () => {
         <div
           className={`flex-1 flex justify-center items-center md:my-0 my-10 relative`}
         >
+          {" "}
           <Image
             priority
             // fill={true}
-            src="/landing/expandyourknowledge.png"
+            src={expandKnowledgeImage}
             alt="Hero image"
             width={512}
             height={1024}
@@ -92,9 +99,10 @@ const HeroSection = () => {
               <div className="h-[1.4rem] bg-n-10 rounded-t-[0.9rem]" />
 
               <div className="aspect-[33/20] rounded-b-[0.9rem] overflow-hidden md:aspect-[688/340] lg:aspect-[1024/490]">
+                {" "}
                 <Image
                   priority
-                  src={"/landing/uploadingtheloom.png"}
+                  src={uploadingLoomImage}
                   className="w-full scale-[1.7] md:scale-[1]"
                   width={1024}
                   height={490}
@@ -103,9 +111,7 @@ const HeroSection = () => {
                   // loading="lazy"
                   blurDataURL={"/landing/uploadingtheloom.png"}
                 />
-
                 <Generating className="absolute left-4 right-4 bottom-5 md:left-1/2 md:right-auto md:bottom-8 md:w-[31rem] md:-translate-x-1/2 " />
-
                 <ScrollParallax isAbsolutelyPositioned>
                   <ul className="hidden absolute -left-[5.5rem] bottom-[7.5rem] px-1 py-1 bg-n-9/40 backdrop-blur border border-n-1/10 rounded-2xl xl:flex">
                     {heroIcons.map((Icon, index) => (
@@ -121,7 +127,6 @@ const HeroSection = () => {
                     ))}
                   </ul>
                 </ScrollParallax>
-
                 <ScrollParallax isAbsolutelyPositioned>
                   <Notification
                     className="hidden absolute -right-[5.5rem] bottom-[11rem] w-[18rem] xl:flex"

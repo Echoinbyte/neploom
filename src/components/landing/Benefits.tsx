@@ -2,6 +2,15 @@ import Image from "next/image";
 import Section from "@/components/landing/Section";
 import { benefits } from "@/config/constants/landing-page";
 import { GradientLight } from "@/design/landing/benefits";
+// Centralized image imports
+import {
+  nepLoomRedLogo,
+  placeholderSvg,
+  benefitsIconMap as iconMap,
+  benefitsBackgroundMap as backgroundMap,
+  featuresBackgroundMap as imageMap,
+  defaultImageBg,
+} from "@/config/imageImports";
 
 const Benefits = () => {
   return (
@@ -13,13 +22,12 @@ const Benefits = () => {
       customPaddings="pt-8 pb-4"
     >
       <div className="mt-2 relative z-[2] flex flex-col justify-center items-center gap-6">
-        {" "}
         <h2 className="text-3xl leading-[2.5rem] sm:text-4xl md:leading-[2.5rem] lg:text-5xl lg:leading-[3.5rem] xl:text-6xl xl:leading-tight text-center font-bold flex flex-wrap justify-center items-center gap-2">
           <span>Think Smarter with</span>
           <span className="flex items-center">
             <Image
               priority
-              src={"/NepLoomRed.svg"}
+              src={nepLoomRedLogo}
               width={32}
               height={32}
               alt="NepLoom Logo"
@@ -41,7 +49,10 @@ const Benefits = () => {
                 <div
                   className="block relative bg-no-repeat bg-[length:100%_100%] max-w-[24rem] md:max-w-[20rem]"
                   style={{
-                    backgroundImage: `url(${Item.backgroundUrl})`,
+                    backgroundImage: `url(${
+                      // backgroundMap["/benefits/card-1.svg"] ||
+                      Item.backgroundUrl
+                    })`,
                   }}
                   key={Item.id}
                 >
@@ -53,9 +64,10 @@ const Benefits = () => {
                       {Item.text}
                     </p>
                     <div className="flex items-center mt-auto">
+                      {" "}
                       <Image
                         priority
-                        src={Item.iconUrl || "/placeholder.svg"}
+                        src={iconMap[Item.iconUrl || ""] || placeholderSvg}
                         // className="h-auto w-auto"
                         width={48}
                         height={48}
@@ -76,13 +88,14 @@ const Benefits = () => {
                     className="absolute inset-0.5"
                     style={{ clipPath: "url(#benefits)" }}
                   >
+                    {" "}
                     <div className="absolute inset-0 opacity-0 transition-opacity hover:opacity-10">
                       {Item.imageUrl && (
                         // <FaIdeal />
                         // <Item.ImageUrl className="w-[380px] h-[362px]"></Item.ImageUrl>
                         <Image
                           priority
-                          src={Item.imageUrl || "/benefits/image-2.png"}
+                          src={imageMap[Item.imageUrl || ""] || defaultImageBg}
                           width={380}
                           height={362}
                           alt={Item.title}

@@ -2,6 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import Section from "@/components/landing/Section";
 
+// Centralized image imports
+import { nepLoomRedLogo } from "@/config/imageImports";
+
 const legalLinks = [
   {
     id: "terms",
@@ -32,10 +35,11 @@ const Footer = () => {
       <div>
         <div className="pt-4">
           <div className="flex justify-center">
+            {" "}
             <Image
               priority
               alt="NepLoom Abstract Logo"
-              src={"/NepLoomRed.svg"}
+              src={nepLoomRedLogo}
               width={144}
               height={144}
               className="h-36 w-36"

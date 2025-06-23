@@ -8,6 +8,9 @@ import { useEffect, useRef, useState } from "react";
 import SwitchTheme from "@/design/theme/ThemeToggle";
 import Image from "next/image";
 import { IoNavigate } from "react-icons/io5";
+
+// Centralized image imports
+import { nepLoomRedLogo } from "@/config/imageImports";
 import { FaSearch } from "react-icons/fa";
 import CommandBox from "@/components/navigation/CommandMenu";
 import useLoomer from "@/hooks/use-loomer";
@@ -72,7 +75,7 @@ const Navbar = () => {
                     <Image
                       priority
                       alt="NepLoom Abstract Logo"
-                      src={"/NepLoomRed.svg"}
+                      src={nepLoomRedLogo}
                       width={96}
                       height={96}
                       className="h-24 w-24"

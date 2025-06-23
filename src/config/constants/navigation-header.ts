@@ -8,22 +8,22 @@ export const CREATION_CATEGORIES = [
       {
         name: "Looms",
         href: `/home?category=looms`,
-        imageSrc: "/nav/looms.jpg",
+        imageSrc: "/navigation/looms.png",
       },
       {
         name: "Quicks",
         href: "/home?category=quicks",
-        imageSrc: "/nav/quicks.jpg",
+        imageSrc: "/navigation/quicks.png",
       },
       {
         name: "Comets",
         href: "/home?category=comets",
-        imageSrc: "/nav/comets.jpg",
+        imageSrc: "/navigation/comets.png",
       },
       {
         name: "Novas",
         href: "/home?category=novas",
-        imageSrc: "/nav/novas.jpg",
+        imageSrc: "/navigation/novas.png",
       },
     ],
   },
@@ -31,7 +31,7 @@ export const CREATION_CATEGORIES = [
 
 export const DEFAULT_LOOMER_DATA: Loomer = {
   loomerName: "Guest",
-  hashId: "guest",
+  hashId: "00000000",
   email: "guest@example.com",
   profileAvatar: "/placeholder-loomer.jpg",
   profileAvatarFallback: "GT",

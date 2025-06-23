@@ -8,6 +8,13 @@ import {
   collabText,
 } from "@/config/constants/landing-page";
 
+// Centralized image imports
+import {
+  collabIconMap,
+  checkedIcon,
+  nepLoomAbstract,
+} from "@/config/imageImports";
+
 const Collaboration = () => {
   return (
     <Section className="" crossesOffset="" id="" customPaddings="py-16" crosses>
@@ -21,9 +28,10 @@ const Collaboration = () => {
             {collabContent.map((item: { id: string; title: string }) => (
               <li className="mb-1 py-1" key={item.id}>
                 <div className="flex items-center">
+                  {" "}
                   <Image
                     priority
-                    src={"/whychooseus/checked.png"}
+                    src={checkedIcon}
                     width={24}
                     height={24}
                     alt="checked Image"
@@ -63,9 +71,10 @@ const Collaboration = () => {
                 }}
               >
                 <div className="flex items-center justify-center w-full h-full bg-[#F1F3EA] dark:bg-[#0E0C15] rounded-full overflow-hidden">
+                  {" "}
                   <Image
                     priority
-                    src={"/NepLoomAbstract.svg"}
+                    src={nepLoomAbstract}
                     width={96}
                     height={96}
                     alt="NepLoom Abstract Logo"
@@ -99,13 +108,14 @@ const Collaboration = () => {
                         transform: `rotate(${index * -45}deg)`,
                       }}
                     >
+                      {" "}
                       <Image
                         priority
                         className="m-auto"
                         width={app.width}
                         height={app.height}
                         alt={`${app.title} - Application Icon ${index + 1}`}
-                        src={app.icon}
+                        src={collabIconMap[app.icon] || app.icon}
                         // loading="lazy"
                       />
                     </div>
