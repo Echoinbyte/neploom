@@ -31,11 +31,11 @@ import { GoScreenFull, GoScreenNormal } from "react-icons/go";
 import VerificationBadge from "@/components/shared/VerificationBadge";
 import { ImFeed } from "react-icons/im";
 import { DEFAULT_LOOMER_DATA } from "@/config/constants/navigation-header";
+import { getAbsoluteUrl } from "@/lib/utils";
 
 const LoomerAccountMenu = () => {
   const { loomer, loading, logoutLoomer } = useLoomer();
-  const { loomerName, hashId, profileAvatar, profileAvatarFallback, role } =
-    loomer || DEFAULT_LOOMER_DATA;
+  const { loomerName, hashId, avatar, role } = loomer || DEFAULT_LOOMER_DATA;
 
   const [correctLoomerName, setCorrectLoomerName] = useState("");
   async function signOutFromDevice() {
@@ -73,11 +73,11 @@ const LoomerAccountMenu = () => {
                 <Avatar className="relative cursor-pointer">
                   <AvatarImage
                     className="unselectable"
-                    src={profileAvatar}
+                    src={avatar}
                     alt={loomerName + "'s Avatar"}
                   />
                   <AvatarFallback className="unselectable">
-                    {profileAvatarFallback}
+                    {loomerName.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </>
@@ -90,7 +90,7 @@ const LoomerAccountMenu = () => {
             <div className="flex flex-col space-y-0.5 leading-none">
               <p className="font-bold text-sm">
                 <Link
-                  href="/profile"
+                  href={getAbsoluteUrl("/profile")}
                   className="h-auto w-full flex flex-row items-center gap-1"
                 >
                   <VerificationBadge

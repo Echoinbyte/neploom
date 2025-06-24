@@ -15,7 +15,7 @@ import { FaSearch } from "react-icons/fa";
 import CommandBox from "@/components/navigation/CommandMenu";
 import useLoomer from "@/hooks/use-loomer";
 import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getAbsoluteUrl } from "@/lib/utils";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import useKeyboardNavigation from "@/hooks/use-keyboard-navigation";
 
@@ -71,7 +71,7 @@ const Navbar = () => {
                 <MobileNav />
 
                 <div className="ml-4 flex lg:ml-0">
-                  <Link href="/">
+                  <Link href={getAbsoluteUrl("/")}>
                     <Image
                       priority
                       alt="NepLoom Abstract Logo"
@@ -118,7 +118,7 @@ const Navbar = () => {
                       <LoomerAccountMenu />
                     ) : (
                       <Link
-                        href="/authentication"
+                        href={getAbsoluteUrl("/authentication")}
                         className={buttonVariants({
                           variant: "ghost",
                         })}

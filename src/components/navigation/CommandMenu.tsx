@@ -19,19 +19,16 @@ import { DEFAULT_LOOMER_DATA } from "@/config/constants/navigation-header";
 import { useRouter } from "next/navigation";
 import { Loomer } from "@/types/Loomer";
 import { getCommandOptions } from "@/lib/command-menu-options";
+import { getAbsoluteUrl } from "@/lib/utils";
 
 const LoomerProfileIcon = ({ size }: { size: number }) => {
   const { loomer } = useLoomer();
-  const { loomerName, profileAvatar } = (loomer ||
-    DEFAULT_LOOMER_DATA) as Loomer;
+  const { loomerName, avatar } = (loomer || DEFAULT_LOOMER_DATA) as Loomer;
   console.log(size);
   return (
     <>
       <Avatar className="h-8 w-8">
-        <AvatarImage
-          alt={`${loomerName}\'s Avatar`}
-          src={profileAvatar}
-        ></AvatarImage>
+        <AvatarImage alt={`${loomerName}\'s Avatar`} src={avatar}></AvatarImage>
         <AvatarFallback>US</AvatarFallback>
       </Avatar>
     </>
@@ -50,7 +47,7 @@ export default function CommandBox({ closeMenu }: { closeMenu: () => void }) {
   );
 
   const handleSelect = (link: string) => {
-    router.push(link);
+    router.push(getAbsoluteUrl(link));
     closeMenu();
   };
   const isGoToPath =

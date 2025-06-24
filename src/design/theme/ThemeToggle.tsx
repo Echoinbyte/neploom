@@ -1,34 +1,40 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "@/styles/design/theme-toggle-design-styles.css";
 import { useTheme } from "next-themes";
 
+type Theme = "light" | "dark";
+
 function SwitchTheme() {
-  const { setTheme } = useTheme();
-  const [currentTheme, setCurrentTheme] = React.useState<any>();
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before rendering to avoid hydration mismatch
   useEffect(() => {
-    localStorage.getItem("theme") === "dark"
-      ? (setTheme("dark"), setCurrentTheme("dark"))
-      : (setTheme("light"), setCurrentTheme("light"));
+    setMounted(true);
   }, []);
 
-  const themeSetter = () => {
-    if (currentTheme === "dark") {
-      setTheme("light");
-      setCurrentTheme("light");
-    } else {
-      setTheme("dark");
-      setCurrentTheme("dark");
-    }
+  const toggleTheme = () => {
+    const newTheme: Theme = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
   };
 
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+    );
+  }
+
+  const isDark = resolvedTheme === "dark";
   return (
-    <>
-      <label className="theme-switch">
+    <div className="theme-toggle-wrapper">
+      <label className="theme-switch" aria-label="Toggle dark mode">
         <input
           type="checkbox"
           className="theme-switch__checkbox"
-          checked={currentTheme === "dark"}
-          onChange={() => themeSetter()}
+          checked={isDark}
+          onChange={toggleTheme}
+          aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
         />
         <div className="theme-switch__container">
           <div className="theme-switch__clouds"></div>
@@ -37,6 +43,7 @@ function SwitchTheme() {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 144 55"
               fill="none"
+              aria-hidden="true"
             >
               <path
                 fillRule="evenodd"
@@ -57,7 +64,7 @@ function SwitchTheme() {
           </div>
         </div>
       </label>
-    </>
+    </div>
   );
 }
 

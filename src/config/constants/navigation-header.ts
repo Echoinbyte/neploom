@@ -33,10 +33,9 @@ export const DEFAULT_LOOMER_DATA: Loomer = {
   loomerName: "Guest",
   hashId: "00000000",
   email: "guest@example.com",
-  profileAvatar: "/placeholder-loomer.jpg",
-  profileAvatarFallback: "GT",
+  avatar: "/placeholder-loomer.jpg",
   role: "guest",
-  hasOnboarded: false,
+  onboardingCompleted: false,
   profile: {
     stats: {
       aura: 0,

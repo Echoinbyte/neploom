@@ -9,6 +9,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { User as Loomer } from "next-auth";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
+import { getAbsoluteUrl } from "@/lib/utils";
 
 const MobileNav = () => {
   const { data: session } = useSession();
@@ -116,20 +117,13 @@ const MobileNav = () => {
               <div className="space-y-6 border-t border-gray-200  dark:border-gray-800 px-4 py-6">
                 <div className="flow-root">
                   <Link
-                    onClick={() => closeOnCurrent("/sign-in")}
-                    href="/sign-in"
+                    onClick={() =>
+                      closeOnCurrent(getAbsoluteUrl("/authentication"))
+                    }
+                    href={getAbsoluteUrl("/authentication")}
                     className="-m-2 block p-2 font-medium"
                   >
-                    Sign in
-                  </Link>
-                </div>
-                <div className="flow-root">
-                  <Link
-                    onClick={() => closeOnCurrent("/sign-up")}
-                    href="/sign-up"
-                    className="-m-2 block p-2 font-medium"
-                  >
-                    Sign up
+                    Authenticate
                   </Link>
                 </div>
               </div>

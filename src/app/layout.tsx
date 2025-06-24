@@ -1,12 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/navigation/Navbar";
-import { LoomerProvider } from "@/context/LoomerContext";
-import SessionProvider from "@/providers/SessionProvider";
 import { ThemeProvider } from "next-themes";
 
-const fontSans = Inter({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -52,7 +49,7 @@ export const metadata: Metadata = {
     title: "NepLoom — Curiosity Unleashed",
     description:
       "Reimagine how you learn, share, and grow with gamified educational content. Join NepLers creating interactive Looms that make learning addictive in a good way.",
-    url: process.env.NEXT_PUBLIC_API_BASE_URL_PROD || "https://neploom.tech",
+    url: process.env.NEXT_PUBLIC_BASE_URL || "https://neploom.tech",
     images: [
       {
         url: "/og-image.png",
@@ -91,11 +88,10 @@ export const metadata: Metadata = {
     // bing: "your-bing-site-verification-code",
   },
   alternates: {
-    canonical:
-      process.env.NEXT_PUBLIC_API_BASE_URL_PROD || "https://neploom.tech",
+    canonical: process.env.NEXT_PUBLIC_BASE_URL || "https://neploom.tech",
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_API_BASE_URL_PROD || "https://neploom.tech"
+    process.env.NEXT_PUBLIC_BASE_URL || "https://neploom.tech"
   ),
 };
 
@@ -118,16 +114,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fontSans.variable} antialiased max-w-screen overflow-x-hidden`}
+        className={`${inter.variable} antialiased max-w-screen overflow-x-hidden`}
       >
-        <SessionProvider>
-          <LoomerProvider>
-            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-              <Navbar />
-              {children}
-            </ThemeProvider>
-          </LoomerProvider>
-        </SessionProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
