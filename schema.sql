@@ -8,21 +8,80 @@ CREATE EXTENSION IF NOT EXISTS "vector";
 CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- Custom Types/Enums
-CREATE TYPE user_role AS ENUM ('supreme', 'admin', 'moderator', 'time', 'space');
-CREATE TYPE galaxy_type AS ENUM ('community', 'brand', 'official');
-CREATE TYPE galaxy_visibility AS ENUM ('public', 'private', 'invite-only');
-CREATE TYPE content_visibility AS ENUM ('published', 'unlisted', 'galaxyOnly', 'followersOnly', 'galaxyAndFollowersOnly');
-CREATE TYPE content_type AS ENUM ('loom', 'quick', 'spark', 'comet', 'dev');
-CREATE TYPE connection_type AS ENUM ('orbit', 'moon', 'star', 'reverse');
-CREATE TYPE invitation_status AS ENUM ('pending', 'accepted', 'declined', 'expired');
-CREATE TYPE dev_language AS ENUM ('html-css-js', 'markdown');
-CREATE TYPE dev_type AS ENUM ('profile', 'game', 'loom');
-CREATE TYPE dev_applicate AS ENUM ('general', 'strict');
-CREATE TYPE spark_type AS ENUM ('quiz', 'blast', 'match', 'flashcard');
-CREATE TYPE access_level AS ENUM ('creator', 'admin', 'moderator', 'starGeneral', 'member', 'guest');
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('supreme', 'admin', 'moderator', 'time', 'space');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE galaxy_type AS ENUM ('community', 'brand', 'official');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE galaxy_visibility AS ENUM ('public', 'private', 'invite-only');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE content_visibility AS ENUM ('published', 'unlisted', 'galaxyOnly', 'followersOnly', 'galaxyAndFollowersOnly');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE content_type AS ENUM ('loom', 'quick', 'spark', 'comet', 'dev');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE connection_type AS ENUM ('orbit', 'moon', 'star', 'reverse');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE invitation_status AS ENUM ('pending', 'accepted', 'declined', 'expired');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE dev_language AS ENUM ('html-css-js', 'markdown');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE dev_type AS ENUM ('profile', 'game', 'loom');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE dev_applicate AS ENUM ('general', 'strict');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE spark_type AS ENUM ('quiz', 'blast', 'match', 'flashcard');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE access_level AS ENUM ('creator', 'admin', 'moderator', 'starGeneral', 'member', 'guest');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Core Users Table (Loomers)
-CREATE TABLE loomers (
+CREATE TABLE IF NOT EXISTS loomers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     loomer_name VARCHAR(50) UNIQUE NOT NULL,
     hash_id VARCHAR(8) UNIQUE NOT NULL,
@@ -49,7 +108,7 @@ CREATE TABLE loomers (
 );
 
 -- User Social Links (normalized, no platform field)
-CREATE TABLE user_social_links (
+CREATE TABLE IF NOT EXISTS user_social_links (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     url TEXT NOT NULL,
@@ -57,7 +116,7 @@ CREATE TABLE user_social_links (
 );
 
 -- User Powers/Achievements (normalized)
-CREATE TABLE user_powers (
+CREATE TABLE IF NOT EXISTS user_powers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -65,7 +124,7 @@ CREATE TABLE user_powers (
 );
 
 -- User Relics/Collectibles (normalized)
-CREATE TABLE user_relics (
+CREATE TABLE IF NOT EXISTS user_relics (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     asset_id VARCHAR(255) NOT NULL,
@@ -74,7 +133,7 @@ CREATE TABLE user_relics (
 );
 
 -- Galaxies (Communities)
-CREATE TABLE galaxies (
+CREATE TABLE IF NOT EXISTS galaxies (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     slug VARCHAR(100) UNIQUE NOT NULL,
     type galaxy_type NOT NULL,
@@ -93,14 +152,14 @@ CREATE TABLE galaxies (
 );
 
 -- Galaxy Star Links (normalized, no platform field)
-CREATE TABLE galaxy_star_links (
+CREATE TABLE IF NOT EXISTS galaxy_star_links (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
     url TEXT NOT NULL
 );
 
 -- Role Maps for Galaxies
-CREATE TABLE role_maps (
+CREATE TABLE IF NOT EXISTS role_maps (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
     role VARCHAR(50) NOT NULL,
@@ -109,7 +168,7 @@ CREATE TABLE role_maps (
 );
 
 -- Galaxy Memberships (Users in Galaxies)
-CREATE TABLE galaxy_memberships (
+CREATE TABLE IF NOT EXISTS galaxy_memberships (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
@@ -121,7 +180,7 @@ CREATE TABLE galaxy_memberships (
 );
 
 -- User Connections (Social Graph)
-CREATE TABLE connections (
+CREATE TABLE IF NOT EXISTS connections (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     peer_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
@@ -132,7 +191,7 @@ CREATE TABLE connections (
 );
 
 -- Invitations (WormHoles) - no responded_at field
-CREATE TABLE invitations (
+CREATE TABLE IF NOT EXISTS invitations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     initiator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     recipient_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
@@ -146,7 +205,7 @@ CREATE TABLE invitations (
 );
 
 -- Dev (Custom Code)
-CREATE TABLE devs (
+CREATE TABLE IF NOT EXISTS devs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     creator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     slug VARCHAR(255) UNIQUE NOT NULL,
@@ -164,14 +223,14 @@ CREATE TABLE devs (
 );
 
 -- Pairs (for Sparks/Flashcards)
-CREATE TABLE pairs (
+CREATE TABLE IF NOT EXISTS pairs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     term TEXT NOT NULL,
     definition TEXT NOT NULL
 );
 
 -- Sparks (Interactive Content)
-CREATE TABLE sparks (
+CREATE TABLE IF NOT EXISTS sparks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     creator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     slug VARCHAR(255) UNIQUE NOT NULL,
@@ -184,7 +243,7 @@ CREATE TABLE sparks (
 );
 
 -- Looms (Main Content)
-CREATE TABLE looms (
+CREATE TABLE IF NOT EXISTS looms (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     creator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
@@ -211,7 +270,7 @@ CREATE TABLE looms (
 );
 
 -- Quicks (Short Content)
-CREATE TABLE quicks (
+CREATE TABLE IF NOT EXISTS quicks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     creator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     slug VARCHAR(255) UNIQUE NOT NULL,
@@ -219,11 +278,15 @@ CREATE TABLE quicks (
     images TEXT[],
     visibility content_visibility DEFAULT 'published',
     vectors vector(384), -- pgvector for AI search
+    -- Requick functionality (similar to retweets)
+    is_requick BOOLEAN DEFAULT FALSE,
+    original_quick_id UUID REFERENCES quicks(id) ON DELETE CASCADE,
+    requick_comment TEXT, -- Optional comment when requicking
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Comets (Polls)
-CREATE TABLE comets (
+CREATE TABLE IF NOT EXISTS comets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     creator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     slug VARCHAR(255) UNIQUE NOT NULL,
@@ -237,7 +300,7 @@ CREATE TABLE comets (
 );
 
 -- Comments (for all content types)
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     commenter_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     content_type content_type NOT NULL,
@@ -250,7 +313,7 @@ CREATE TABLE comments (
 );
 
 -- Likes (for all content types)
-CREATE TABLE likes (
+CREATE TABLE IF NOT EXISTS likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     content_type content_type NOT NULL,
@@ -260,7 +323,7 @@ CREATE TABLE likes (
 );
 
 -- Content Lists (User-organized content)
-CREATE TABLE content_lists (
+CREATE TABLE IF NOT EXISTS content_lists (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -269,7 +332,7 @@ CREATE TABLE content_lists (
 );
 
 -- Content List Items
-CREATE TABLE content_list_items (
+CREATE TABLE IF NOT EXISTS content_list_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     list_id UUID REFERENCES content_lists(id) ON DELETE CASCADE,
     content_type content_type NOT NULL,
@@ -279,7 +342,7 @@ CREATE TABLE content_list_items (
 );
 
 -- Galaxy Topics
-CREATE TABLE galaxy_topics (
+CREATE TABLE IF NOT EXISTS galaxy_topics (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -288,7 +351,7 @@ CREATE TABLE galaxy_topics (
 );
 
 -- Galaxy Topic Contents
-CREATE TABLE galaxy_topic_contents (
+CREATE TABLE IF NOT EXISTS galaxy_topic_contents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     topic_id UUID REFERENCES galaxy_topics(id) ON DELETE CASCADE,
     content_type content_type NOT NULL,
@@ -298,7 +361,7 @@ CREATE TABLE galaxy_topic_contents (
 );
 
 -- Galaxy Events
-CREATE TABLE galaxy_events (
+CREATE TABLE IF NOT EXISTS galaxy_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
@@ -313,7 +376,7 @@ CREATE TABLE galaxy_events (
 );
 
 -- Event Participants
-CREATE TABLE event_participants (
+CREATE TABLE IF NOT EXISTS event_participants (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     event_id UUID REFERENCES galaxy_events(id) ON DELETE CASCADE,
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
@@ -322,7 +385,7 @@ CREATE TABLE event_participants (
 );
 
 -- Event Submissions
-CREATE TABLE event_submissions (
+CREATE TABLE IF NOT EXISTS event_submissions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     event_id UUID REFERENCES galaxy_events(id) ON DELETE CASCADE,
     user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
@@ -332,7 +395,7 @@ CREATE TABLE event_submissions (
 );
 
 -- Galaxy Rooms (Chat)
-CREATE TABLE galaxy_rooms (
+CREATE TABLE IF NOT EXISTS galaxy_rooms (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -341,7 +404,7 @@ CREATE TABLE galaxy_rooms (
 );
 
 -- Messages
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     sender_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     room_id UUID REFERENCES galaxy_rooms(id) ON DELETE CASCADE,
@@ -356,7 +419,7 @@ CREATE TABLE messages (
 );
 
 -- Content Reports
-CREATE TABLE content_reports (
+CREATE TABLE IF NOT EXISTS content_reports (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     reporter_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
     content_type content_type NOT NULL,
@@ -366,7 +429,7 @@ CREATE TABLE content_reports (
 );
 
 -- Monetization (Affiliate Links)
-CREATE TABLE affiliate_links (
+CREATE TABLE IF NOT EXISTS affiliate_links (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     loom_id UUID REFERENCES looms(id) ON DELETE CASCADE,
     url TEXT NOT NULL,
@@ -374,7 +437,7 @@ CREATE TABLE affiliate_links (
 );
 
 -- Content Associations (Many-to-Many relationships between content)
-CREATE TABLE content_associations (
+CREATE TABLE IF NOT EXISTS content_associations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     source_type content_type NOT NULL,
     source_id UUID NOT NULL,
@@ -385,74 +448,76 @@ CREATE TABLE content_associations (
 );
 
 -- Performance Indexes
-CREATE INDEX idx_loomers_email ON loomers(email);
-CREATE INDEX idx_loomers_loomer_name ON loomers(loomer_name);
-CREATE INDEX idx_loomers_hash_id ON loomers(hash_id);
-CREATE INDEX idx_loomers_role ON loomers(role);
-CREATE INDEX idx_loomers_created_at ON loomers(created_at);
-CREATE INDEX idx_loomers_interests ON loomers USING gin(interests);
-CREATE INDEX idx_loomers_dislikes ON loomers USING gin(dislikes);
-CREATE INDEX idx_loomers_vectors ON loomers USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS idx_loomers_email ON loomers(email);
+CREATE INDEX IF NOT EXISTS idx_loomers_loomer_name ON loomers(loomer_name);
+CREATE INDEX IF NOT EXISTS idx_loomers_hash_id ON loomers(hash_id);
+CREATE INDEX IF NOT EXISTS idx_loomers_role ON loomers(role);
+CREATE INDEX IF NOT EXISTS idx_loomers_created_at ON loomers(created_at);
+CREATE INDEX IF NOT EXISTS idx_loomers_interests ON loomers USING gin(interests);
+CREATE INDEX IF NOT EXISTS idx_loomers_dislikes ON loomers USING gin(dislikes);
+CREATE INDEX IF NOT EXISTS idx_loomers_vectors ON loomers USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
-CREATE INDEX idx_galaxies_slug ON galaxies(slug);
-CREATE INDEX idx_galaxies_type ON galaxies(type);
-CREATE INDEX idx_galaxies_visibility ON galaxies(visibility);
-CREATE INDEX idx_galaxies_vectors ON galaxies USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS idx_galaxies_slug ON galaxies(slug);
+CREATE INDEX IF NOT EXISTS idx_galaxies_type ON galaxies(type);
+CREATE INDEX IF NOT EXISTS idx_galaxies_visibility ON galaxies(visibility);
+CREATE INDEX IF NOT EXISTS idx_galaxies_vectors ON galaxies USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
-CREATE INDEX idx_galaxy_memberships_user_id ON galaxy_memberships(user_id);
-CREATE INDEX idx_galaxy_memberships_galaxy_id ON galaxy_memberships(galaxy_id);
-CREATE INDEX idx_galaxy_memberships_role ON galaxy_memberships(role);
+CREATE INDEX IF NOT EXISTS idx_galaxy_memberships_user_id ON galaxy_memberships(user_id);
+CREATE INDEX IF NOT EXISTS idx_galaxy_memberships_galaxy_id ON galaxy_memberships(galaxy_id);
+CREATE INDEX IF NOT EXISTS idx_galaxy_memberships_role ON galaxy_memberships(role);
 
-CREATE INDEX idx_connections_user_id ON connections(user_id);
-CREATE INDEX idx_connections_peer_id ON connections(peer_id);
-CREATE INDEX idx_connections_type ON connections(connection_type);
+CREATE INDEX IF NOT EXISTS idx_connections_user_id ON connections(user_id);
+CREATE INDEX IF NOT EXISTS idx_connections_peer_id ON connections(peer_id);
+CREATE INDEX IF NOT EXISTS idx_connections_type ON connections(connection_type);
 
-CREATE INDEX idx_invitations_initiator_id ON invitations(initiator_id);
-CREATE INDEX idx_invitations_recipient_id ON invitations(recipient_id);
-CREATE INDEX idx_invitations_status ON invitations(status);
-CREATE INDEX idx_invitations_expires_at ON invitations(expires_at);
+CREATE INDEX IF NOT EXISTS idx_invitations_initiator_id ON invitations(initiator_id);
+CREATE INDEX IF NOT EXISTS idx_invitations_recipient_id ON invitations(recipient_id);
+CREATE INDEX IF NOT EXISTS idx_invitations_status ON invitations(status);
+CREATE INDEX IF NOT EXISTS idx_invitations_expires_at ON invitations(expires_at);
 
-CREATE INDEX idx_looms_creator_id ON looms(creator_id);
-CREATE INDEX idx_looms_slug ON looms(slug);
-CREATE INDEX idx_looms_visibility ON looms(visibility);
-CREATE INDEX idx_looms_created_at ON looms(created_at);
-CREATE INDEX idx_looms_views ON looms(views);
-CREATE INDEX idx_looms_vectors ON looms USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
-CREATE INDEX idx_looms_tags ON looms USING gin(tags);
+CREATE INDEX IF NOT EXISTS idx_looms_creator_id ON looms(creator_id);
+CREATE INDEX IF NOT EXISTS idx_looms_slug ON looms(slug);
+CREATE INDEX IF NOT EXISTS idx_looms_visibility ON looms(visibility);
+CREATE INDEX IF NOT EXISTS idx_looms_created_at ON looms(created_at);
+CREATE INDEX IF NOT EXISTS idx_looms_views ON looms(views);
+CREATE INDEX IF NOT EXISTS idx_looms_vectors ON looms USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS idx_looms_tags ON looms USING gin(tags);
 
-CREATE INDEX idx_quicks_creator_id ON quicks(creator_id);
-CREATE INDEX idx_quicks_slug ON quicks(slug);
-CREATE INDEX idx_quicks_created_at ON quicks(created_at);
-CREATE INDEX idx_quicks_vectors ON quicks USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS idx_quicks_creator_id ON quicks(creator_id);
+CREATE INDEX IF NOT EXISTS idx_quicks_slug ON quicks(slug);
+CREATE INDEX IF NOT EXISTS idx_quicks_created_at ON quicks(created_at);
+CREATE INDEX IF NOT EXISTS idx_quicks_is_requick ON quicks(is_requick);
+CREATE INDEX IF NOT EXISTS idx_quicks_original_quick_id ON quicks(original_quick_id);
+CREATE INDEX IF NOT EXISTS idx_quicks_vectors ON quicks USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
-CREATE INDEX idx_sparks_creator_id ON sparks(creator_id);
-CREATE INDEX idx_sparks_slug ON sparks(slug);
-CREATE INDEX idx_sparks_type ON sparks(type);
-CREATE INDEX idx_sparks_vectors ON sparks USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS idx_sparks_creator_id ON sparks(creator_id);
+CREATE INDEX IF NOT EXISTS idx_sparks_slug ON sparks(slug);
+CREATE INDEX IF NOT EXISTS idx_sparks_type ON sparks(type);
+CREATE INDEX IF NOT EXISTS idx_sparks_vectors ON sparks USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
-CREATE INDEX idx_comets_creator_id ON comets(creator_id);
-CREATE INDEX idx_comets_slug ON comets(slug);
-CREATE INDEX idx_comets_expires_at ON comets(expires_at);
-CREATE INDEX idx_comets_vectors ON comets USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS idx_comets_creator_id ON comets(creator_id);
+CREATE INDEX IF NOT EXISTS idx_comets_slug ON comets(slug);
+CREATE INDEX IF NOT EXISTS idx_comets_expires_at ON comets(expires_at);
+CREATE INDEX IF NOT EXISTS idx_comets_vectors ON comets USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
-CREATE INDEX idx_devs_creator_id ON devs(creator_id);
-CREATE INDEX idx_devs_slug ON devs(slug);
-CREATE INDEX idx_devs_type ON devs(type);
-CREATE INDEX idx_devs_language ON devs(language);
-CREATE INDEX idx_devs_vectors ON devs USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS idx_devs_creator_id ON devs(creator_id);
+CREATE INDEX IF NOT EXISTS idx_devs_slug ON devs(slug);
+CREATE INDEX IF NOT EXISTS idx_devs_type ON devs(type);
+CREATE INDEX IF NOT EXISTS idx_devs_language ON devs(language);
+CREATE INDEX IF NOT EXISTS idx_devs_vectors ON devs USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
-CREATE INDEX idx_comments_content_type_id ON comments(content_type, content_id);
-CREATE INDEX idx_comments_commenter_id ON comments(commenter_id);
-CREATE INDEX idx_comments_created_at ON comments(created_at);
-CREATE INDEX idx_comments_vectors ON comments USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS idx_comments_content_type_id ON comments(content_type, content_id);
+CREATE INDEX IF NOT EXISTS idx_comments_commenter_id ON comments(commenter_id);
+CREATE INDEX IF NOT EXISTS idx_comments_created_at ON comments(created_at);
+CREATE INDEX IF NOT EXISTS idx_comments_vectors ON comments USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
-CREATE INDEX idx_likes_user_content ON likes(user_id, content_type, content_id);
-CREATE INDEX idx_likes_content ON likes(content_type, content_id);
+CREATE INDEX IF NOT EXISTS idx_likes_user_content ON likes(user_id, content_type, content_id);
+CREATE INDEX IF NOT EXISTS idx_likes_content ON likes(content_type, content_id);
 
-CREATE INDEX idx_messages_sender_id ON messages(sender_id);
-CREATE INDEX idx_messages_room_id ON messages(room_id);
-CREATE INDEX idx_messages_connection_id ON messages(connection_id);
-CREATE INDEX idx_messages_created_at ON messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_room_id ON messages(room_id);
+CREATE INDEX IF NOT EXISTS idx_messages_connection_id ON messages(connection_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
 
 -- Functions for updating timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -464,18 +529,23 @@ END;
 $$ language 'plpgsql';
 
 -- Triggers for automatic timestamp updates
+DROP TRIGGER IF EXISTS update_loomers_updated_at ON loomers;
 CREATE TRIGGER update_loomers_updated_at BEFORE UPDATE ON loomers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_galaxies_updated_at ON galaxies;
 CREATE TRIGGER update_galaxies_updated_at BEFORE UPDATE ON galaxies
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_looms_updated_at ON looms;
 CREATE TRIGGER update_looms_updated_at BEFORE UPDATE ON looms
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_devs_updated_at ON devs;
 CREATE TRIGGER update_devs_updated_at BEFORE UPDATE ON devs
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_comments_updated_at ON comments;
 CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON comments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -488,3 +558,7 @@ BEGIN
     WHERE status = 'pending' AND expires_at < NOW();
 END;
 $$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- END OF SCHEMA - Functions are in separate files under /supabase/functions/
+-- ============================================================================

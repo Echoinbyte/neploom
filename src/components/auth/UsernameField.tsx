@@ -39,7 +39,7 @@ export default function UsernameField({ className = "" }: UsernameFieldProps) {
     >
       <User className="icon text-gray-600 dark:text-gray-300" />
       <input
-        name="username"
+        name="loomerName"
         type="text"
         placeholder="Username"
         value={username}

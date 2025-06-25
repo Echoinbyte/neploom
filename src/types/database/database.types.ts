@@ -206,6 +206,10 @@ export interface Quick {
   images?: string[];
   visibility: ContentVisibility;
   vectors?: number[]; // pgvector(384)
+  // Requick functionality (similar to retweets)
+  is_requick: boolean;
+  original_quick_id?: string;
+  requick_comment?: string;
   created_at: Date;
 }
 

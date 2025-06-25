@@ -2,10 +2,9 @@ export type Loomer = {
   loomerName: string;
   hashId: string;
   email: string;
-  profileAvatar: string;
-  profileAvatarFallback: string;
+  avatar: string;
   role: "guest" | "user" | "author" | "admin" | "time";
-  hasOnboarded: boolean;
+  onboardingCompleted: boolean;
   profile: {
     stats: {
       aura: number;

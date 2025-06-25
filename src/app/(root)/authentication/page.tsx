@@ -12,12 +12,16 @@ import ModeToggle from "@/components/auth/ModeToggle";
 import UsernameField from "@/components/auth/UsernameField";
 import MaxWidthWrapper from "@/components/shared/MaxWidthWrapper";
 import SpaceBackground from "@/design/auth/SpaceBackground";
-import { signInAction, signUpAction } from "./actions";
+import { signInAction } from "@/actions/authentication/signInActions";
+import { signUpAction } from "@/actions/authentication/signUpActions";
+import { redirect } from "next/navigation";
+import type { RedirectData } from "@/types/api.types";
 // import { Suspense } from "react";
 
 interface Params {
   mode?: string;
   error?: string;
+  message?: string;
   success?: string;
 }
 
@@ -26,8 +30,39 @@ export default async function AuthContent({
 }: {
   searchParams: Promise<Params>;
 }) {
-  const { mode, error, success } = await searchParams;
+  const { mode, error, message, success } = await searchParams;
   const isSignUpMode = mode === "signup" ? true : false;
+
+  const signInActionHandler = async (formData: FormData) => {
+    "use server";
+    const response = await signInAction(formData);
+
+    if (response.success) {
+      const redirectTo = (response.data as RedirectData)?.redirectTo || "/home";
+      redirect(redirectTo);
+    } else {
+      const redirectTo =
+        (response.data as RedirectData)?.redirectTo ||
+        "/authentication?error=signin-failed";
+      redirect(redirectTo);
+    }
+  };
+
+  const signUpActionHandler = async (formData: FormData) => {
+    "use server";
+    const response = await signUpAction(formData);
+
+    if (response.success) {
+      const redirectTo =
+        (response.data as RedirectData)?.redirectTo || "/verifyEmail";
+      redirect(redirectTo);
+    } else {
+      const redirectTo =
+        (response.data as RedirectData)?.redirectTo ||
+        "/authentication?error=signup-failed&mode=signup";
+      redirect(redirectTo);
+    }
+  };
 
   return (
     <MaxWidthWrapper>
@@ -36,13 +71,23 @@ export default async function AuthContent({
         <div className="forms-container">
           <div className="signin-signup">
             {/* Sign In Form */}
-            <form action={signInAction} className="sign-in-form">
+            <form action={signInActionHandler} className="sign-in-form">
               <h2 className="title text-black dark:text-white">Sign in</h2>
               {error === "signin-failed" && (
                 <FormMessage>
-                  Sign in failed. Please check your credentials.
+                  {message || "Sign in failed. Please check your credentials."}
                 </FormMessage>
-              )}{" "}
+              )}
+              {error === "verification-required" && (
+                <FormMessage>
+                  {message || "Please verify your email before signing in."}
+                </FormMessage>
+              )}
+              {error === "validation-failed" && (
+                <FormMessage>
+                  {message || "Please check your input and try again."}
+                </FormMessage>
+              )}
               <FormItem>
                 <div className="input-field bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                   <MdOutlineMail className="icon text-gray-600 dark:text-gray-300" />
@@ -71,14 +116,37 @@ export default async function AuthContent({
             </form>
 
             {/* Sign Up Form */}
-            <form action={signUpAction} className="sign-up-form">
+            <form action={signUpActionHandler} className="sign-up-form">
               <h2 className="title text-black dark:text-white">Sign up</h2>
               {error === "signup-failed" && (
-                <FormMessage>Sign up failed. Please try again.</FormMessage>
+                <FormMessage>
+                  {message || "Sign up failed. Please try again."}
+                </FormMessage>
+              )}
+              {error === "email-exists" && (
+                <FormMessage>
+                  {message || "A user with this email already exists."}
+                </FormMessage>
+              )}
+              {error === "username-exists" && (
+                <FormMessage>
+                  {message || "This username is already taken."}
+                </FormMessage>
+              )}
+              {error === "validation-failed" && (
+                <FormMessage>
+                  {message || "Please check your input and try again."}
+                </FormMessage>
               )}
               {success === "signup-complete" && (
                 <FormMessage className="text-green-500">
-                  Account created successfully!
+                  {message || "Account created successfully!"}
+                </FormMessage>
+              )}
+              {success === "verified" && (
+                <FormMessage className="text-green-500">
+                  {message ||
+                    "Email verified successfully! You can now sign in."}
                 </FormMessage>
               )}
               <FormItem>
@@ -108,10 +176,8 @@ export default async function AuthContent({
                 />{" "}
               </FormItem>
               <SimpleSubmitButton>Sign Up</SimpleSubmitButton>
-              <SocialAuth />
             </form>
-
-            {/* <SocialAuth /> */}
+            <SocialAuth />
           </div>
         </div>
         <div className="panels-container">

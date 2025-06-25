@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const usernameValidation = z
+export const loomerNameValidation = z
   .string()
   .min(2, "Username must be at least 2 characters")
   .max(20, "Username must be no more than 20 characters")
@@ -10,7 +10,7 @@ export const usernameValidation = z
   );
 
 export const signUpSchema = z.object({
-  username: usernameValidation,
+  loomerName: loomerNameValidation,
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()

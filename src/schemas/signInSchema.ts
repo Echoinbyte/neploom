@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { usernameValidation } from "@/schemas/signUpSchema";
+import { loomerNameValidation } from "@/schemas/signUpSchema";
 
 const emailSchema = z.string().email({
   message: "Invalid email address",
 });
 export const signInSchema = z.object({
-  identifier: z.union([usernameValidation, emailSchema]),
+  identifier: z.union([loomerNameValidation, emailSchema]),
   password: z
     .string()
     .min(8, { message: "Password must be 8 characters or more" })

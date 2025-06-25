@@ -193,6 +193,10 @@ export interface Quick {
   images?: string[];
   visibility: ContentVisibility;
   vectors?: number[];
+  // Requick functionality (similar to retweets)
+  isRequick: boolean;
+  originalQuick?: Quick;
+  requickComment?: string;
   createdAt: Date;
 }
 
@@ -344,6 +348,10 @@ export interface CreateQuickData {
   content: string;
   images?: string[];
   visibility: ContentVisibility;
+  // For requicks
+  isRequick?: boolean;
+  originalQuickId?: string;
+  requickComment?: string;
 }
 
 export interface CreateSparkData {
