@@ -111,21 +111,32 @@ const Navbar = () => {
                       </div>
                     )}
                   </div>
-                  <SwitchTheme />
-                  <span className="h-6 w-px bg-gray-200" aria-hidden="true" />
-                  <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                    {loomer?.isVerified ? (
-                      <LoomerAccountMenu />
-                    ) : (
-                      <Link
-                        href={getAbsoluteUrl("/authentication")}
-                        className={buttonVariants({
-                          variant: "ghost",
-                        })}
-                      >
-                        Be Smart &rarr;
-                      </Link>
-                    )}
+                  <div className="flex flex-row items-center justify-center gap-2 lg:gap-6">
+                    <SwitchTheme />
+                    <span
+                      className={cn(
+                        loomer?.isVerified ? "flex" : "hidden",
+                        "lg:flex h-6 w-px bg-gray-200"
+                      )}
+                      aria-hidden="true"
+                    />
+                    <div className="flex flex-1 lg:items-center lg:justify-end lg:space-x-6">
+                      {loomer?.isVerified ? (
+                        <LoomerAccountMenu />
+                      ) : (
+                        <Link
+                          href={getAbsoluteUrl("/authentication")}
+                          className={cn(
+                            buttonVariants({
+                              variant: "ghost",
+                            }),
+                            "hidden lg:inline-flex"
+                          )}
+                        >
+                          Be Smart &rarr;
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

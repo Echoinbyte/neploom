@@ -21,13 +21,13 @@ interface Params {
   success?: string;
 }
 
-export default async function AuthContent({ params }: { params: Promise<Params> }) {
-  const { mode, error, success } = await params;
-  const isSignUpMode = mode === "signup";
-  // const searchParams = useSearchParams();
-  // const isSignUpMode = searchParams.get("mode") === "signup";
-  // const error = searchParams.get("error");
-  // const success = searchParams.get("success");
+export default async function AuthContent({
+  searchParams,
+}: {
+  searchParams: Promise<Params>;
+}) {
+  const { mode, error, success } = await searchParams;
+  const isSignUpMode = mode === "signup" ? true : false;
 
   return (
     <MaxWidthWrapper>
