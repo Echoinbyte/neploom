@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rootDomain } from "@/lib/utils";
-import { applicationRoutes } from "./config/applicationRoutes";
+import {
+  applicationRoutes,
+  specialGalaxySubdomains,
+  specialUserSubdomains,
+} from "@/config/applicationRoutes";
 
 function extractSubdomain(request: NextRequest): string | null {
   const url = request.url;
@@ -10,14 +14,15 @@ function extractSubdomain(request: NextRequest): string | null {
   // Local development environment
   if (url.includes("localhost") || url.includes("127.0.0.1")) {
     // Try to extract subdomain from the full URL
-    const fullUrlMatch = url.match(/http:\/\/([^.]+)\.localhost/);
+    const fullUrlMatch = url.match(/http:\/\/([^.]+(?:\.[^.]+)*)\.localhost/);
     if (fullUrlMatch && fullUrlMatch[1]) {
       return fullUrlMatch[1];
     }
 
     // Fallback to host header approach
     if (hostname.includes(".localhost")) {
-      return hostname.split(".")[0];
+      const parts = hostname.split(".localhost")[0];
+      return parts;
     }
 
     return null;
@@ -32,7 +37,7 @@ function extractSubdomain(request: NextRequest): string | null {
     return parts.length > 0 ? parts[0] : null;
   }
 
-  // Regular subdomain detection
+  // Regular subdomain detection - handle nested subdomains
   const isSubdomain =
     hostname !== rootDomainFormatted &&
     hostname !== `www.${rootDomainFormatted}` &&
@@ -45,6 +50,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const subdomain = extractSubdomain(request);
 
+  // Block access to admin page from subdomains
+  if (pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
   // Check if we're on a subdomain
   if (subdomain) {
     // Check if subdomain matches any application route
@@ -55,17 +65,101 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    // Block access to admin page from subdomains
-    if (pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/", request.url));
+    // Nepler specific Subdomain
+    if (subdomain.startsWith("nepler-")) {
+      return NextResponse.rewrite(
+        new URL(
+          `/nepler/${subdomain.replace("nepler-", "")}${pathname}`,
+          request.url
+        )
+      );
     }
 
-    // Handle regular nebula subdomains (only if not an application route)
-    return NextResponse.rewrite(new URL(`/nebula/${subdomain}`, request.url));
+    // Handle nepler user sub-subdomains (e.g., looms.nepler-username)
+    const subdomainParts = subdomain.split(".");
+    if (subdomainParts.length > 1) {
+      const subSection = subdomainParts[0];
+      const mainSubdomain = subdomainParts.slice(1).join(".");
+
+      // Nepler user subsection routing
+      if (
+        mainSubdomain.startsWith("nepler-") &&
+        specialUserSubdomains.includes(subSection)
+      ) {
+        const neplerUsername = mainSubdomain.replace("nepler-", "");
+        return NextResponse.rewrite(
+          new URL(
+            `/nepler/${neplerUsername}/${subSection}${pathname}`,
+            request.url
+          )
+        );
+      }
+
+      // Galaxy subsection routing
+      if (specialGalaxySubdomains.includes(subSection)) {
+        return NextResponse.rewrite(
+          new URL(
+            `/galaxy/${mainSubdomain}/${subSection}${pathname}`,
+            request.url
+          )
+        );
+      }
+    }
+
+    // Handle regular galaxy subdomains with dynamic path mapping
+    return handleGalaxyRouting(subdomain, pathname, request);
   }
 
   // On the root domain, allow normal access
   return NextResponse.next();
+}
+
+function handleGalaxyRouting(
+  galaxyName: string,
+  pathname: string,
+  request: NextRequest
+) {
+  // Remove leading slash for easier processing
+  const cleanPath = pathname.startsWith("/") ? pathname.slice(1) : pathname;
+  const pathParts = cleanPath.split("/").filter(Boolean);
+
+  if (pathParts.length === 0) {
+    // Route to galaxy home page
+    return NextResponse.rewrite(new URL(`/galaxy/${galaxyName}`, request.url));
+  }
+
+  if (pathParts.length === 1) {
+    // Route to user profile within galaxy
+    return NextResponse.rewrite(
+      new URL(`/galaxy/${galaxyName}/${pathParts[0]}`, request.url)
+    );
+  }
+
+  if (pathParts.length === 2) {
+    const [loomerName, contentType] = pathParts;
+
+    // Route to user's content section within galaxy
+    return NextResponse.rewrite(
+      new URL(`/galaxy/${galaxyName}/${loomerName}/${contentType}`, request.url)
+    );
+  }
+
+  if (pathParts.length === 3) {
+    const [loomerName, contentType, slug] = pathParts;
+
+    // Route to specific content item within user's section
+    return NextResponse.rewrite(
+      new URL(
+        `/galaxy/${galaxyName}/${loomerName}/${contentType}/${slug}`,
+        request.url
+      )
+    );
+  }
+
+  // For longer paths, preserve the structure within galaxy
+  return NextResponse.rewrite(
+    new URL(`/galaxy/${galaxyName}/${cleanPath}`, request.url)
+  );
 }
 
 export const config = {
