@@ -1,8 +1,6 @@
-/* * {
-  margin: 0;
-  padding: 0;
+* {
   box-sizing: border-box;
-} */
+}
 
 .container {
   position: relative;
@@ -90,6 +88,8 @@ form.sign-in-form {
 
 .input-field .icon {
   margin: auto;
+  height: 16px;
+  width: 16px;
 }
 
 .input-field input {
@@ -97,36 +97,14 @@ form.sign-in-form {
   outline: none;
   border: none;
   line-height: 1;
-  font-weight: 600;
+  font-weight: 400;
   font-size: 1.1rem;
   width: 100%;
-  color: var(--foreground);
 }
 
 .input-field input:focus {
   outline: none;
   background: transparent !important;
-}
-
-.input-field input::-webkit-input-placeholder {
-  color: #b7b7b7 !important;
-  font-weight: 500;
-}
-
-.input-field input::placeholder {
-  color: #b7b7b7 !important;
-  font-weight: 500;
-}
-
-/* Dark mode placeholder colors */
-.dark .input-field input::-webkit-input-placeholder {
-  color: #8f8f8f !important;
-  font-weight: 500;
-}
-
-.dark .input-field input::placeholder {
-  color: #8f8f8f !important;
-  font-weight: 500;
 }
 
 /* Prevent autofill styling and suggestion overlay */
@@ -168,6 +146,7 @@ form.sign-in-form {
 .input-field input:-webkit-autofill:focus,
 .input-field input:-webkit-autofill:active,
 .input-field input:-webkit-autofill:valid,
+.input-field input:not(:placeholder-shown),
 .input-field input[autocomplete]:focus,
 .input-field input[autocomplete]:active {
   -webkit-text-fill-color: var(--foreground) !important;
@@ -177,9 +156,12 @@ form.sign-in-form {
   background-clip: text !important;
 }
 
-/* Force text color when selecting suggestions from dropdown */
-.input-field input:not(:placeholder-shown) {
-  color: var(--foreground) !important;
+.input-field input::placeholder {
+  -webkit-text-fill-color: var(--muted-foreground) !important;
+  color: var(--muted-foreground) !important;
+  background: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
 }
 
 /* Override any browser suggestion styling */
@@ -193,18 +175,6 @@ form.sign-in-form {
   pointer-events: none;
   position: absolute;
   right: 0;
-}
-
-/* Additional input text protection for all states */
-.input-field input,
-.input-field input:focus,
-.input-field input:active,
-.input-field input:valid,
-.input-field input[type="text"],
-.input-field input[type="email"],
-.input-field input[type="password"] {
-  color: var(--foreground) !important;
-  -webkit-text-fill-color: var(--foreground) !important;
 }
 
 .social-text {

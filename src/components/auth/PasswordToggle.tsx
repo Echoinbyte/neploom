@@ -26,7 +26,6 @@ export default function PasswordToggle({
         name={fieldName}
         type={isPasswordVisible ? "text" : "password"}
         placeholder={placeholder}
-        className="text-gray-800 dark:text-gray-50 bg-transparent focus:outline-none pr-10"
         required
         minLength={8}
         maxLength={50}

@@ -50,7 +50,6 @@ export default async function AuthContent({
                     name="identifier"
                     type="text"
                     placeholder="Email or Username"
-                    className="text-gray-800 dark:text-gray-50 bg-transparent focus:outline-none"
                     required
                     autoComplete="new-password"
                     data-lpignore="true"
@@ -92,7 +91,6 @@ export default async function AuthContent({
                     name="email"
                     type="email"
                     placeholder="Email"
-                    className="text-gray-800 dark:text-gray-50 bg-transparent focus:outline-none"
                     required
                     autoComplete="new-password"
                     data-lpignore="true"

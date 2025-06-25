@@ -42,7 +42,6 @@ export default function UsernameField({ className = "" }: UsernameFieldProps) {
         name="username"
         type="text"
         placeholder="Username"
-        className="text-gray-800 dark:text-gray-50 bg-transparent focus:outline-none"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         required
