@@ -34,6 +34,8 @@ export interface User {
   hashId: string;
   avatar: string;
   bio?: string;
+  interests?: string[];
+  dislikes?: string[];
   starLinks: { link: string }[];
   joinedAt: Date;
 
@@ -197,6 +199,7 @@ export interface Quick {
 export interface Spark {
   id: string;
   creator: User;
+  slug: string;
   name: string;
   type: SparkType;
   pair?: Pair;
@@ -214,6 +217,7 @@ export interface Pair {
 export interface Comet {
   id: string;
   creator: User;
+  slug: string;
   title: string;
   description?: string;
   options: PollOption[];
@@ -232,6 +236,7 @@ export interface PollOption {
 export interface Dev {
   id: string;
   creator: User;
+  slug: string;
   title?: string;
   description?: string;
   coverImage?: string;
@@ -335,12 +340,14 @@ export interface CreateLoomData {
 }
 
 export interface CreateQuickData {
+  slug: string;
   content: string;
   images?: string[];
   visibility: ContentVisibility;
 }
 
 export interface CreateSparkData {
+  slug: string;
   name: string;
   type: SparkType;
   pairId?: string;
@@ -348,6 +355,7 @@ export interface CreateSparkData {
 }
 
 export interface CreateCometData {
+  slug: string;
   title: string;
   description?: string;
   options: Omit<PollOption, "id" | "votes">[];
@@ -356,6 +364,7 @@ export interface CreateCometData {
 }
 
 export interface CreateDevData {
+  slug: string;
   title?: string;
   description?: string;
   code: string;
@@ -386,6 +395,8 @@ export interface UpdateProfileData {
   loomerName?: string;
   bio?: string;
   avatar?: string;
+  interests?: string[];
+  dislikes?: string[];
   starLinks?: { link: string }[];
 }
 

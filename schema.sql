@@ -41,6 +41,8 @@ CREATE TABLE loomers (
     level INTEGER DEFAULT 1,
     xp INTEGER DEFAULT 0,
     aura INTEGER DEFAULT 1 CHECK (aura >= 1 AND aura <= 15),
+    interests TEXT[], -- Array of user interests
+    dislikes TEXT[], -- Array of user dislikes
     vectors vector(384), -- pgvector for AI search
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -147,6 +149,7 @@ CREATE TABLE invitations (
 CREATE TABLE devs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     creator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
+    slug VARCHAR(255) UNIQUE NOT NULL,
     title VARCHAR(255),
     description TEXT,
     cover_image TEXT,
@@ -171,6 +174,7 @@ CREATE TABLE pairs (
 CREATE TABLE sparks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     creator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
+    slug VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     type spark_type NOT NULL,
     pair_id UUID REFERENCES pairs(id) ON DELETE SET NULL,
@@ -222,6 +226,7 @@ CREATE TABLE quicks (
 CREATE TABLE comets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     creator_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
+    slug VARCHAR(255) UNIQUE NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     options JSONB NOT NULL, -- Store poll options as JSON
@@ -385,6 +390,8 @@ CREATE INDEX idx_loomers_loomer_name ON loomers(loomer_name);
 CREATE INDEX idx_loomers_hash_id ON loomers(hash_id);
 CREATE INDEX idx_loomers_role ON loomers(role);
 CREATE INDEX idx_loomers_created_at ON loomers(created_at);
+CREATE INDEX idx_loomers_interests ON loomers USING gin(interests);
+CREATE INDEX idx_loomers_dislikes ON loomers USING gin(dislikes);
 CREATE INDEX idx_loomers_vectors ON loomers USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
 CREATE INDEX idx_galaxies_slug ON galaxies(slug);
@@ -414,18 +421,22 @@ CREATE INDEX idx_looms_vectors ON looms USING ivfflat (vectors vector_cosine_ops
 CREATE INDEX idx_looms_tags ON looms USING gin(tags);
 
 CREATE INDEX idx_quicks_creator_id ON quicks(creator_id);
+CREATE INDEX idx_quicks_slug ON quicks(slug);
 CREATE INDEX idx_quicks_created_at ON quicks(created_at);
 CREATE INDEX idx_quicks_vectors ON quicks USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
 CREATE INDEX idx_sparks_creator_id ON sparks(creator_id);
+CREATE INDEX idx_sparks_slug ON sparks(slug);
 CREATE INDEX idx_sparks_type ON sparks(type);
 CREATE INDEX idx_sparks_vectors ON sparks USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
 CREATE INDEX idx_comets_creator_id ON comets(creator_id);
+CREATE INDEX idx_comets_slug ON comets(slug);
 CREATE INDEX idx_comets_expires_at ON comets(expires_at);
 CREATE INDEX idx_comets_vectors ON comets USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);
 
 CREATE INDEX idx_devs_creator_id ON devs(creator_id);
+CREATE INDEX idx_devs_slug ON devs(slug);
 CREATE INDEX idx_devs_type ON devs(type);
 CREATE INDEX idx_devs_language ON devs(language);
 CREATE INDEX idx_devs_vectors ON devs USING ivfflat (vectors vector_cosine_ops) WITH (lists = 100);

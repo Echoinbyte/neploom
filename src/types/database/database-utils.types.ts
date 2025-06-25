@@ -114,6 +114,18 @@ export type UpdateDev = Partial<
   updated_at?: Date;
 };
 
+export type UpdateSpark = Partial<Omit<Spark, "id" | "created_at">> & {
+  id: string;
+};
+
+export type UpdateComet = Partial<Omit<Comet, "id" | "created_at">> & {
+  id: string;
+};
+
+export type UpdateQuick = Partial<Omit<Quick, "id" | "created_at">> & {
+  id: string;
+};
+
 export type UpdateComment = Partial<
   Omit<Comment, "id" | "created_at" | "updated_at">
 > & {
@@ -126,6 +138,8 @@ export interface LoomerFilters {
   role?: UserRole | UserRole[];
   is_verified?: boolean;
   onboarding_completed?: boolean;
+  interests?: string[]; // Filter by interests
+  dislikes?: string[]; // Filter by dislikes
   created_after?: Date;
   created_before?: Date;
   search?: string; // for full-text search

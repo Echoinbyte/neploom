@@ -46,6 +46,8 @@ export interface Loomer {
   level: number;
   xp: number;
   aura: number;
+  interests?: string[]; // Array of user interests
+  dislikes?: string[]; // Array of user dislikes
   vectors?: number[]; // pgvector(384)
   created_at: Date;
   updated_at: Date;
@@ -138,6 +140,7 @@ export interface Invitation {
 export interface Dev {
   id: string;
   creator_id: string;
+  slug: string;
   title?: string;
   description?: string;
   cover_image?: string;
@@ -160,6 +163,7 @@ export interface Pair {
 export interface Spark {
   id: string;
   creator_id: string;
+  slug: string;
   name: string;
   type: SparkType;
   pair_id?: string;
@@ -208,6 +212,7 @@ export interface Quick {
 export interface Comet {
   id: string;
   creator_id: string;
+  slug: string;
   title: string;
   description?: string;
   options: Record<string, unknown>; // JSONB - poll options stored as JSON
