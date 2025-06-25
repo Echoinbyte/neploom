@@ -1,5 +1,3 @@
-"use client";
-
 import "@/styles/authentication-page-styles.css";
 import { log, reg } from "@/config/imageImports";
 import { MdOutlineMail } from "react-icons/md";
@@ -15,14 +13,21 @@ import UsernameField from "@/components/auth/UsernameField";
 import MaxWidthWrapper from "@/components/shared/MaxWidthWrapper";
 import SpaceBackground from "@/design/auth/SpaceBackground";
 import { signInAction, signUpAction } from "./actions";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+// import { Suspense } from "react";
 
-function AuthContent() {
-  const searchParams = useSearchParams();
-  const isSignUpMode = searchParams.get("mode") === "signup";
-  const error = searchParams.get("error");
-  const success = searchParams.get("success");
+interface Params {
+  mode?: string;
+  error?: string;
+  success?: string;
+}
+
+export default async function AuthContent({ params }: { params: Promise<Params> }) {
+  const { mode, error, success } = await params;
+  const isSignUpMode = mode === "signup";
+  // const searchParams = useSearchParams();
+  // const isSignUpMode = searchParams.get("mode") === "signup";
+  // const error = searchParams.get("error");
+  // const success = searchParams.get("success");
 
   return (
     <MaxWidthWrapper>
@@ -151,10 +156,10 @@ function AuthContent() {
   );
 }
 
-export default function AuthPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <AuthContent />
-    </Suspense>
-  );
-}
+// export default function AuthPage() {
+//   return (
+//     <Suspense fallback={<div>Loading...</div>}>
+//       <AuthContent />
+//     </Suspense>
+//   );
+// }
