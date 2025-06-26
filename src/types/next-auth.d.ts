@@ -1,5 +1,6 @@
 import "next-auth";
 import { DefaultSession } from "next-auth";
+import { Loomer } from "./Loomer";
 
 interface UserData {
   id: string;
@@ -7,21 +8,17 @@ interface UserData {
   loomer_name: string;
   is_verified: boolean;
   onboarding_completed: boolean;
-  role: string;
+  role: "guest" | "user" | "author" | "admin" | "time";
   avatar?: string;
+  stardust?: number;
+  aura?: number;
+  level?: number;
+  xp?: number;
 }
 
 declare module "next-auth" {
   interface Session {
-    user: {
-      id: string;
-      hashId: string;
-      isVerified: boolean;
-      username: string;
-      role: string;
-      profileAvatar?: string;
-      onboardingCompleted: boolean;
-    } & DefaultSession["user"];
+    user: Loomer & DefaultSession["user"];
   }
 
   interface User {
@@ -29,9 +26,13 @@ declare module "next-auth" {
     hashId: string;
     isVerified: boolean;
     loomerName: string;
-    role: string;
+    role: "guest" | "user" | "author" | "admin" | "time";
     avatar?: string;
     onboardingCompleted: boolean;
+    stardust?: number;
+    aura?: number;
+    level?: number;
+    xp?: number;
     customUserData?: UserData;
   }
 }
@@ -41,9 +42,13 @@ declare module "next-auth/jwt" {
     id: string;
     hashId: string;
     isVerified: boolean;
-    username: string;
-    role: string;
+    loomerName: string;
+    role: "guest" | "user" | "author" | "admin" | "time";
     avatar?: string;
     onboardingCompleted: boolean;
+    stardust: number;
+    aura: number;
+    level: number;
+    xp: number;
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { MdOutlineMail } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
@@ -10,19 +10,47 @@ import SimpleSubmitButton from "@/components/auth/SimpleSubmitButton";
 import PasswordToggle from "@/components/auth/PasswordToggle";
 import SocialAuth from "@/components/auth/SocialAuth";
 import UsernameField from "@/components/auth/UsernameField";
-import { signInAction } from "@/actions/authentication/signInActions";
 import { signUpAction } from "@/actions/authentication/signUpActions";
-import { sendVerificationEmailAction } from "@/actions/authentication/emailActions";
-import { signInSchema } from "@/schemas/signInSchema";
-import { signUpSchema } from "@/schemas/signUpSchema";
+import {
+  sendVerificationEmailAction,
+  resendVerificationCodeAction,
+} from "@/actions/authentication/verificationActions";
+import { signInSchema, signUpSchema } from "@/schemas";
 import type { AuthData } from "@/types/api.types";
+import { signIn } from "next-auth/react";
 
 export default function AuthenticationForms() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSignInLoading, setIsSignInLoading] = useState(false);
   const [isSignUpLoading, setIsSignUpLoading] = useState(false);
   const [signInErrors, setSignInErrors] = useState<Record<string, string>>({});
   const [signUpErrors, setSignUpErrors] = useState<Record<string, string>>({});
+
+  const handleResendVerification = async (identifier: string) => {
+    try {
+      toast.loading("Resending verification email...", { id: "resend" });
+
+      const response = await resendVerificationCodeAction({
+        identifier,
+      });
+
+      if (response.success) {
+        toast.success("Verification email sent! Check your inbox", {
+          id: "resend",
+        });
+      } else {
+        toast.error(response.message || "Failed to resend verification email", {
+          id: "resend",
+        });
+      }
+    } catch (error) {
+      console.error("Resend verification error:", error);
+      toast.error("Failed to resend verification email", {
+        id: "resend",
+      });
+    }
+  };
 
   const handleSignIn = async (formData: FormData) => {
     setIsSignInLoading(true);
@@ -50,26 +78,102 @@ export default function AuthenticationForms() {
       }
 
       toast.loading("Signing you in...", { id: "signin" });
-      const response = await signInAction(formData);
+      const response = await signIn("credentials", {
+        redirect: false,
+        identifier: formValues.identifier,
+        password: formValues.password,
+      });
 
-      if (response.success) {
+      // Handle NextAuth response
+      if (response?.ok) {
         toast.success("Welcome back!", { id: "signin" });
         router.push("/home");
-      } else {
-        toast.error(response.message || "Sign in failed", { id: "signin" });
+      } else if (response?.error) {
+        let errorMessage = "Sign in failed";
+        let showVerificationInfo = false;
 
-        // Handle specific error cases
-        if (response.message?.includes("verify")) {
-          toast.info("Please check your email for verification instructions", {
-            duration: 5000,
-          });
+        switch (response.error) {
+          case "CredentialsSignin":
+            // Check the URL for our custom error codes using Next.js hook
+            const errorParam = searchParams.get("error");
+
+            if (errorParam === "VERIFICATION_REQUIRED") {
+              errorMessage = "Please verify your email before signing in";
+              showVerificationInfo = true;
+            } else if (errorParam === "INVALID_CREDENTIALS") {
+              errorMessage = "Invalid email/username or password";
+            } else if (errorParam === "DATABASE_ERROR") {
+              errorMessage =
+                "Database connection failed. Please try again later.";
+            } else {
+              errorMessage = "Invalid email/username or password";
+            }
+            break;
+          case "AccessDenied":
+            errorMessage = "Access denied. Please check your credentials";
+            break;
+          default:
+            errorMessage = "An error occurred during sign in";
         }
+
+        toast.error(errorMessage, { id: "signin" });
+
+        if (showVerificationInfo) {
+          toast.info("Check your email for verification instructions", {
+            duration: 6000,
+          });
+
+          // Show resend verification option
+          setTimeout(() => {
+            toast.custom(
+              (toastId) => (
+                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Didn&apos;t receive the verification email?
+                  </p>
+                  <button
+                    onClick={() => {
+                      handleResendVerification(formValues.identifier);
+                      toast.dismiss(toastId);
+                    }}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Resend verification email
+                  </button>
+                </div>
+              ),
+              { duration: 10000 }
+            );
+          }, 2000);
+        }
+      } else {
+        toast.error("An unexpected error occurred. Please try again.", {
+          id: "signin",
+        });
       }
     } catch (error) {
       console.error("Sign in error:", error);
-      toast.error("An unexpected error occurred. Please try again.", {
-        id: "signin",
-      });
+
+      // Handle different types of errors
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        toast.error(
+          "Network error. Please check your connection and try again.",
+          {
+            id: "signin",
+          }
+        );
+      } else if (error instanceof Error) {
+        toast.error(
+          error.message || "An unexpected error occurred. Please try again.",
+          {
+            id: "signin",
+          }
+        );
+      } else {
+        toast.error("An unexpected error occurred. Please try again.", {
+          id: "signin",
+        });
+      }
     } finally {
       setIsSignInLoading(false);
     }
@@ -191,7 +295,10 @@ export default function AuthenticationForms() {
               placeholder="Email or Username"
               required
               autoComplete="username"
-              className={signInErrors.identifier ? "border-red-500" : ""}
+              disabled={isSignInLoading}
+              className={`${signInErrors.identifier ? "border-red-500" : ""} ${
+                isSignInLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             />
           </div>
           {signInErrors.identifier && (

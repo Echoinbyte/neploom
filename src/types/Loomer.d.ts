@@ -1,14 +1,13 @@
 export type Loomer = {
+  id: string;
   loomerName: string;
   hashId: string;
-  email: string;
   avatar: string;
   role: "guest" | "user" | "author" | "admin" | "time";
   onboardingCompleted: boolean;
-  profile: {
-    stats: {
-      aura: number;
-    };
-  };
+  stardust: number;
+  aura: number;
+  level: number;
+  xp: number;
   isVerified: boolean;
 };

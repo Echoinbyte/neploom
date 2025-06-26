@@ -16,8 +16,12 @@ interface ExtendedUser extends User {
   loomerName: string;
   isVerified: boolean;
   onboardingCompleted: boolean;
-  role: string;
+  role: "guest" | "user" | "author" | "admin" | "time";
   avatar?: string;
+  stardust?: number;
+  aura?: number;
+  level?: number;
+  xp?: number;
 }
 
 interface UserData {
@@ -26,8 +30,12 @@ interface UserData {
   loomer_name: string;
   is_verified: boolean;
   onboarding_completed: boolean;
-  role: string;
+  role: "guest" | "user" | "author" | "admin" | "time";
   avatar?: string;
+  stardust?: number;
+  aura?: number;
+  level?: number;
+  xp?: number;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -57,11 +65,15 @@ export const authOptions: NextAuthOptions = {
 
           if (error) {
             console.error("Authentication error:", error);
-            return null;
+            throw new Error("DATABASE_ERROR");
           }
 
           if (!data.success) {
-            return null;
+            // Create specific error codes that we can handle in the component
+            if (data.requires_verification) {
+              throw new Error("VERIFICATION_REQUIRED");
+            }
+            throw new Error("INVALID_CREDENTIALS");
           }
 
           // Return user data in NextAuth User format with consistent camelCase
@@ -76,6 +88,10 @@ export const authOptions: NextAuthOptions = {
             onboardingCompleted: data.user.onboarding_completed,
             role: data.user.role,
             avatar: data.user.avatar,
+            stardust: data.user.stardust || 0,
+            aura: data.user.aura || 0,
+            level: data.user.level || 0,
+            xp: data.user.xp || 0,
           } as ExtendedUser;
         } catch (err: unknown) {
           console.error("Authorization error:", err);
@@ -142,27 +158,37 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         const extendedUser = user as ExtendedUser;
-
-        // Handle social login users vs credential users
         if (extendedUser.customUserData) {
-          // Social login - data comes from API in snake_case
           const userData = extendedUser.customUserData;
           token.id = userData.id;
           token.hashId = userData.hash_id;
-          token.username = userData.loomer_name;
+          token.loomerName = userData.loomer_name;
           token.isVerified = userData.is_verified;
           token.onboardingCompleted = userData.onboarding_completed;
-          token.role = userData.role;
+          token.role = userData.role as
+            | "guest"
+            | "user"
+            | "author"
+            | "admin"
+            | "time";
           token.avatar = userData.avatar;
+          token.stardust = userData.stardust || 0;
+          token.aura = userData.aura || 0;
+          token.level = userData.level || 0;
+          token.xp = userData.xp || 0;
         } else {
           // Credential login - data already converted to camelCase
           token.id = extendedUser.id;
           token.hashId = extendedUser.hashId;
-          token.username = extendedUser.loomerName;
+          token.loomerName = extendedUser.loomerName;
           token.isVerified = extendedUser.isVerified;
           token.onboardingCompleted = extendedUser.onboardingCompleted;
           token.role = extendedUser.role;
           token.avatar = extendedUser.avatar;
+          token.stardust = extendedUser.stardust || 0;
+          token.aura = extendedUser.aura || 0;
+          token.level = extendedUser.level || 0;
+          token.xp = extendedUser.xp || 0;
         }
       }
 
@@ -173,10 +199,19 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.hashId = token.hashId as string;
         session.user.isVerified = token.isVerified as boolean;
-        session.user.username = token.username as string;
-        session.user.role = token.role as string;
-        session.user.profileAvatar = token.avatar as string;
+        session.user.loomerName = token.loomerName as string;
+        session.user.role = token.role as
+          | "guest"
+          | "user"
+          | "author"
+          | "admin"
+          | "time";
+        session.user.avatar = token.avatar as string;
         session.user.onboardingCompleted = token.onboardingCompleted as boolean;
+        session.user.stardust = token.stardust as number;
+        session.user.aura = token.aura as number;
+        session.user.level = token.level as number;
+        session.user.xp = token.xp as number;
       }
       return session;
     },
@@ -188,5 +223,14 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/authentication",
+    error: "/authentication?error=true",
+  },
+  events: {
+    async signIn({ user, account }) {
+      console.log("Sign in event:", {
+        user: user.email,
+        provider: account?.provider,
+      });
+    },
   },
 };

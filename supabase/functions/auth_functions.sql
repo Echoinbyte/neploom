@@ -14,20 +14,61 @@ DECLARE
   v_password_hash TEXT;
   v_result JSON;
 BEGIN
-  -- Check if user already exists
-  IF EXISTS (SELECT 1 FROM loomers WHERE email = p_email) THEN
+  -- Check if verified user with this email exists
+  IF EXISTS (
+    SELECT 1 FROM loomers 
+    WHERE email = p_email 
+    AND is_verified = true
+  ) THEN
     RETURN json_build_object(
       'success', false,
       'error', 'User with this email already exists'
     );
   END IF;
 
-  IF EXISTS (SELECT 1 FROM loomers WHERE loomer_name = p_loomer_name) THEN
+  -- Check if unverified user with this email exists and verification hasn't expired
+  IF EXISTS (
+    SELECT 1 FROM loomers 
+    WHERE email = p_email 
+    AND is_verified = false 
+    AND verification_expires_at > NOW()
+  ) THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'User with this email already exists'
+    );
+  END IF;
+
+  -- Check if verified user with this username exists
+  IF EXISTS (
+    SELECT 1 FROM loomers 
+    WHERE loomer_name = p_loomer_name 
+    AND is_verified = true
+  ) THEN
     RETURN json_build_object(
       'success', false,
       'error', 'Username is already taken'
     );
   END IF;
+
+  -- Check if unverified user with this username exists and verification hasn't expired
+  IF EXISTS (
+    SELECT 1 FROM loomers 
+    WHERE loomer_name = p_loomer_name 
+    AND is_verified = false 
+    AND verification_expires_at > NOW()
+  ) THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'Username is already taken'
+    );
+  END IF;
+
+  -- Clean up expired unverified accounts with same email or username
+  DELETE FROM loomers 
+  WHERE (email = p_email OR loomer_name = p_loomer_name)
+  AND is_verified = false 
+  AND verification_expires_at <= NOW();
 
   -- Generate unique hash_id
   v_hash_id := substring(gen_random_uuid()::text, 1, 8);
@@ -121,6 +162,11 @@ DECLARE
   v_user RECORD;
   v_result JSON;
 BEGIN
+  -- Clean up expired unverified accounts first
+  DELETE FROM loomers 
+  WHERE is_verified = false 
+  AND verification_expires_at <= NOW();
+
   -- Find user by email or username
   SELECT * INTO v_user
   FROM loomers
@@ -137,7 +183,8 @@ BEGIN
   IF NOT v_user.is_verified THEN
     RETURN json_build_object(
       'success', false,
-      'error', 'Please verify your account before logging in'
+      'error', 'Please verify your account before logging in',
+      'requires_verification', true
     );
   END IF;
 
@@ -188,16 +235,16 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to verify user email
 CREATE OR REPLACE FUNCTION verify_user_email(
-  p_email TEXT,
+  p_identifier TEXT,
   p_verification_code TEXT
 ) RETURNS JSON AS $$
 DECLARE
   v_user RECORD;
 BEGIN
-  -- Find user with verification code
+  -- Find user with verification code by email or username
   SELECT * INTO v_user
   FROM loomers
-  WHERE email = p_email;
+  WHERE (email = p_identifier OR loomer_name = p_identifier);
 
   IF NOT FOUND THEN
     RETURN json_build_object(
@@ -252,21 +299,30 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to resend verification code
 CREATE OR REPLACE FUNCTION resend_verification_code(
-  p_email TEXT
+  p_identifier TEXT
 ) RETURNS JSON AS $$
 DECLARE
-  v_user_id UUID;
+  v_user RECORD;
   v_verification_code TEXT;
 BEGIN
-  -- Check if user exists and is not verified
-  SELECT id INTO v_user_id
+  -- Check if user exists and is not verified (by email or username)
+  SELECT * INTO v_user
   FROM loomers
-  WHERE email = p_email AND NOT is_verified;
+  WHERE (email = p_identifier OR loomer_name = p_identifier) 
+  AND NOT is_verified;
 
   IF NOT FOUND THEN
     RETURN json_build_object(
       'success', false,
       'error', 'User not found or already verified'
+    );
+  END IF;
+
+  -- Check if current verification code has expired (allow resend only if expired or no code exists)
+  IF v_user.verification_expires_at IS NOT NULL AND v_user.verification_expires_at > NOW() THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'A verification code was recently sent. Please wait before requesting a new one.'
     );
   END IF;
 
@@ -279,12 +335,71 @@ BEGIN
     verification_code = v_verification_code,
     verification_expires_at = NOW() + INTERVAL '15 minutes',
     updated_at = NOW()
-  WHERE id = v_user_id;
+  WHERE id = v_user.id;
 
   RETURN json_build_object(
     'success', true,
     'verification_code', v_verification_code,
+    'email', v_user.email,
+    'username', v_user.loomer_name,
     'message', 'Verification code sent successfully'
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', SQLERRM
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to initiate password reset (generate verification code)
+CREATE OR REPLACE FUNCTION initiate_password_reset(
+  p_identifier TEXT
+) RETURNS JSON AS $$
+DECLARE
+  v_user RECORD;
+  v_verification_code TEXT;
+BEGIN
+  -- Check if user exists and is verified (by email or username)
+  SELECT * INTO v_user
+  FROM loomers
+  WHERE (email = p_identifier OR loomer_name = p_identifier) 
+  AND is_verified = true;
+
+  IF NOT FOUND THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'User not found or account not verified'
+    );
+  END IF;
+
+  -- Check if current verification code has not expired yet (prevent spam)
+  IF v_user.verification_expires_at IS NOT NULL AND v_user.verification_expires_at > NOW() THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'A password reset code was recently sent. Please wait before requesting a new one.'
+    );
+  END IF;
+
+  -- Generate new verification code for password reset
+  v_verification_code := LPAD((FLOOR(RANDOM() * 900000) + 100000)::TEXT, 6, '0');
+
+  -- Update verification code and expiry
+  UPDATE loomers
+  SET 
+    verification_code = v_verification_code,
+    verification_expires_at = NOW() + INTERVAL '15 minutes',
+    updated_at = NOW()
+  WHERE id = v_user.id;
+
+  RETURN json_build_object(
+    'success', true,
+    'verification_code', v_verification_code,
+    'email', v_user.email,
+    'username', v_user.loomer_name,
+    'message', 'Password reset code sent successfully'
   );
 
 EXCEPTION
@@ -298,7 +413,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to reset password
 CREATE OR REPLACE FUNCTION reset_password(
-  p_email TEXT,
+  p_identifier TEXT,
   p_new_password TEXT,
   p_verification_code TEXT
 ) RETURNS JSON AS $$
@@ -306,10 +421,10 @@ DECLARE
   v_user RECORD;
   v_password_hash TEXT;
 BEGIN
-  -- Find user with verification code
+  -- Find user with verification code by email or username
   SELECT * INTO v_user
   FROM loomers
-  WHERE email = p_email;
+  WHERE (email = p_identifier OR loomer_name = p_identifier);
 
   IF NOT FOUND THEN
     RETURN json_build_object(

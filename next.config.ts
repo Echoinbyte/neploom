@@ -10,6 +10,16 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        search: "",
+      },
+    ],
+  },
   experimental: {
     serverActions: {
       allowedOrigins: ["localhost:3000", "*.localhost:3000"],

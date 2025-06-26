@@ -6,7 +6,7 @@ export const loomerNameValidation = z
   .max(20, "Username must be no more than 20 characters")
   .regex(
     /^[a-zA-Z0-9_]+$/,
-    "Username must only contain letters, digits, and underscores",
+    "Username must only contain letters, digits, and underscores"
   );
 
 export const signUpSchema = z.object({
@@ -17,3 +17,5 @@ export const signUpSchema = z.object({
     .min(8, { message: "Password must not be less than 8 characters" })
     .max(50, { message: "Password must not be more than 50 characters" }),
 });
+
+export type SignUpFormData = z.infer<typeof signUpSchema>;

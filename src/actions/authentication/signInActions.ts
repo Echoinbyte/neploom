@@ -3,10 +3,10 @@
 import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { createServerClient } from "@/supabase/server";
-import { signInSchema } from "@/schemas/signInSchema";
+import { signInSchema, type SignInFormData } from "@/schemas/signInSchema";
 import type { ApiResponse } from "@/types/api.types";
 
-export type SignInFormData = z.infer<typeof signInSchema>;
+export type { SignInFormData };
 
 export async function signInAction(formData: FormData): Promise<ApiResponse> {
   // Extract data from FormData
