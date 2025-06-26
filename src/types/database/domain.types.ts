@@ -216,6 +216,8 @@ export interface Pair {
   id: string;
   term: string;
   definition: string;
+  options?: Record<string, unknown>; // Optional JSONB field for quiz options
+  createdAt: Date;
 }
 
 export interface Comet {

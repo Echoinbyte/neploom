@@ -14,9 +14,21 @@ export async function signUpAction(formData: FormData): Promise<ApiResponse> {
   const password = formData.get("password") as string;
   const loomerName = formData.get("loomerName") as string;
 
-  // Validate input
+  // Validate input with safeParse
+  const validation = signUpSchema.safeParse({ email, password, loomerName });
+
+  if (!validation.success) {
+    return {
+      success: false,
+      message: validation.error.errors[0].message,
+      data: {
+        validationErrors: validation.error.errors,
+      },
+    };
+  }
+
   try {
-    const validatedData = signUpSchema.parse({ email, password, loomerName });
+    const validatedData = validation.data;
 
     // Call the create user RPC function
     const result = await createUser({
@@ -25,33 +37,38 @@ export async function signUpAction(formData: FormData): Promise<ApiResponse> {
       loomerName: validatedData.loomerName,
     });
 
-    if (!result || !result.success) {
+    if (!result?.success) {
       const errorMessage = result?.error || "Unknown error";
 
-      if (errorMessage.includes("email")) {
+      // Handle specific error types with better messaging
+      if (errorMessage.toLowerCase().includes("email")) {
         return {
           success: false,
           message: "A user with this email already exists",
-          data: {
-            redirectTo: "/authentication?error=email-exists&mode=signup",
-          },
         };
       }
 
-      if (errorMessage.includes("username")) {
+      if (
+        errorMessage.toLowerCase().includes("username") ||
+        errorMessage.toLowerCase().includes("loomer_name")
+      ) {
         return {
           success: false,
           message: "This username is already taken",
-          data: {
-            redirectTo: "/authentication?error=username-exists&mode=signup",
-          },
         };
       }
 
       return {
         success: false,
-        message: "Sign up failed. Please try again.",
-        data: { redirectTo: "/authentication?error=signup-failed&mode=signup" },
+        message: "Account creation failed. Please try again.",
+      };
+    }
+
+    // Validate result data
+    if (!result.user || !result.verification_code) {
+      return {
+        success: false,
+        message: "Account creation incomplete. Please try again.",
       };
     }
 
@@ -60,29 +77,14 @@ export async function signUpAction(formData: FormData): Promise<ApiResponse> {
       success: true,
       message: "Account created successfully! Please verify your email.",
       data: {
-        redirectTo: "/verifyEmail",
         verification_code: result.verification_code,
         user: result.user,
       },
     };
-  } catch (error) {
-    console.error("Sign up validation error:", error);
-
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        message: error.errors[0].message,
-        data: {
-          redirectTo: "/authentication?error=validation-failed&mode=signup",
-          validationErrors: error.errors,
-        },
-      };
-    }
-
+  } catch {
     return {
       success: false,
-      message: "Sign up failed. Please try again.",
-      data: { redirectTo: "/authentication?error=signup-failed&mode=signup" },
+      message: "An unexpected error occurred during sign up",
     };
   }
 }
@@ -97,10 +99,19 @@ export type VerifyEmailFormData = z.infer<typeof verifyEmailSchema>;
 export async function verifyEmailAction(
   formData: VerifyEmailFormData
 ): Promise<ApiResponse> {
-  try {
-    // Validate input
-    const validatedData = verifyEmailSchema.parse(formData);
+  // Validate input with safeParse
+  const validation = verifyEmailSchema.safeParse(formData);
 
+  if (!validation.success) {
+    return {
+      success: false,
+      message: validation.error.errors[0].message,
+      data: { validationErrors: validation.error.errors },
+    };
+  }
+
+  try {
+    const validatedData = validation.data;
     const supabase = await createServerClient();
 
     // Call the verify_user_email RPC function
@@ -110,40 +121,27 @@ export async function verifyEmailAction(
     });
 
     if (error) {
-      console.error("Email verification error:", error);
       return {
         success: false,
-        message: "Verification failed",
+        message: "Verification failed due to a technical error",
       };
     }
 
-    if (!data.success) {
+    if (!data?.success) {
       return {
         success: false,
-        message: data.error,
+        message: data?.error || "Invalid verification code",
       };
     }
 
     return {
       success: true,
       message: "Email verified successfully! You can now sign in.",
-      data: { redirectTo: "/authentication?success=verified" },
     };
-  } catch (error) {
-    console.error("Email verification error:", error);
-
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        message: error.errors[0].message,
-        data: { validationErrors: error.errors },
-      };
-    }
-
+  } catch {
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to verify email",
+      message: "An unexpected error occurred during verification",
     };
   }
 }
@@ -157,10 +155,19 @@ export type ResendCodeFormData = z.infer<typeof resendCodeSchema>;
 export async function resendVerificationCodeAction(
   formData: ResendCodeFormData
 ): Promise<ApiResponse> {
-  try {
-    // Validate input
-    const validatedData = resendCodeSchema.parse(formData);
+  // Validate input with safeParse
+  const validation = resendCodeSchema.safeParse(formData);
 
+  if (!validation.success) {
+    return {
+      success: false,
+      message: validation.error.errors[0].message,
+      data: { validationErrors: validation.error.errors },
+    };
+  }
+
+  try {
+    const validatedData = validation.data;
     const supabase = await createServerClient();
 
     // Call the resend_verification_code RPC function
@@ -169,44 +176,60 @@ export async function resendVerificationCodeAction(
     });
 
     if (error) {
-      console.error("Resend verification error:", error);
       return {
         success: false,
-        message: "Failed to resend verification code",
+        message: "Failed to resend verification code due to technical error",
       };
     }
 
-    if (!data.success) {
+    if (!data?.success) {
       return {
         success: false,
-        message: data.error,
+        message: data?.error || "Failed to resend verification code",
       };
     }
 
-    // TODO: Send new verification email using data.verification_code
+    // Import and send email with resend type
+    const { sendEmail } = await import("@/lib/sendEmail");
+
+    // Get user info from the response or fetch it
+    const { data: userData, error: userError } = await supabase
+      .from("loomers")
+      .select("loomer_name")
+      .eq("email", validatedData.email)
+      .single();
+
+    if (userError) {
+      return {
+        success: false,
+        message: "Failed to fetch user information",
+      };
+    }
+
+    const emailResponse = await sendEmail(
+      validatedData.email,
+      userData.loomer_name,
+      data.verification_code,
+      "resend"
+    );
+
+    if (!emailResponse?.success) {
+      return {
+        success: false,
+        message: "Verification code generated but failed to send email",
+        data: { verification_code: data.verification_code },
+      };
+    }
 
     return {
       success: true,
       message: "New verification code sent to your email.",
       data: { verification_code: data.verification_code },
     };
-  } catch (error) {
-    console.error("Resend verification code error:", error);
-
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        message: error.errors[0].message,
-        data: { validationErrors: error.errors },
-      };
-    }
-
+  } catch {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to resend verification code",
+      message: "An unexpected error occurred while resending verification code",
     };
   }
 }

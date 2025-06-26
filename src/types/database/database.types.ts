@@ -37,6 +37,7 @@ export interface Loomer {
   dob?: Date;
   location?: string;
   avatar: string;
+  banner?: string; // New banner field
   role: UserRole;
   onboarding_completed: boolean;
   is_verified: boolean;
@@ -53,12 +54,10 @@ export interface Loomer {
   updated_at: Date;
 }
 
-export interface UserSocialLink {
-  id: string;
-  user_id: string;
-  url: string;
-  created_at: Date;
-}
+// Removed - replaced by StarLink unified table
+// export interface UserSocialLink
+// export interface GalaxyStarLink
+// export interface AffiliateLink
 
 export interface UserPower {
   id: string;
@@ -88,15 +87,24 @@ export interface Galaxy {
   visibility: GalaxyVisibility;
   call_to_action_label?: string;
   call_to_action_url?: string;
+  newsletter_enabled: boolean; // New newsletter feature
+  newsletter_email?: string; // Email for sending newsletters
+  newsletter_app_password?: string; // App password for email auth
+  newsletter_content_threshold: number; // Content threshold for newsletter
   vectors?: number[]; // pgvector(384)
   created_at: Date;
   updated_at: Date;
 }
 
-export interface GalaxyStarLink {
+// Unified Star Links (replaces GalaxyStarLink, UserSocialLink, affiliate links)
+export interface StarLink {
   id: string;
-  galaxy_id: string;
+  loomer_id?: string; // Optional: for user social links
+  galaxy_id?: string; // Optional: for galaxy star links
+  loom_id?: string; // Optional: for loom affiliate links
   url: string;
+  label?: string; // Optional label for the link
+  created_at: Date;
 }
 
 export interface RoleMap {
@@ -113,7 +121,22 @@ export interface GalaxyMembership {
   role: string;
   reputation_title?: string;
   reputation_score: number;
+  newsletter_subscribed: boolean; // New newsletter subscription preference
   joined_at: Date;
+}
+
+// New table for galaxy newsletter management
+export interface GalaxyNewsletterSubscription {
+  id: string;
+  galaxy_id: string;
+  loomer_ids: string[]; // Array of subscribed loomer IDs
+  email_address: string; // Email address for sending
+  app_password: string; // App password for email authentication
+  content_threshold: number; // Threshold for triggering newsletter
+  current_count: number; // Current count of new content since last newsletter
+  last_sent_at?: Date; // When was the last newsletter sent
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface Connection {
@@ -158,6 +181,8 @@ export interface Pair {
   id: string;
   term: string;
   definition: string;
+  options?: Record<string, unknown>; // Optional JSONB field for quiz options
+  created_at: Date;
 }
 
 export interface Spark {
@@ -336,12 +361,8 @@ export interface ContentReport {
   reported_at: Date;
 }
 
-export interface AffiliateLink {
-  id: string;
-  loom_id: string;
-  url: string;
-  added_at: Date;
-}
+// Removed - replaced by StarLink unified table
+// export interface AffiliateLink
 
 export interface ContentAssociation {
   id: string;
@@ -355,11 +376,11 @@ export interface ContentAssociation {
 // Database Table Names (useful for dynamic queries)
 export const TABLE_NAMES = {
   LOOMERS: "loomers",
-  USER_SOCIAL_LINKS: "user_social_links",
+  STAR_LINKS: "star_links", // Unified table for all link types
   USER_POWERS: "user_powers",
   USER_RELICS: "user_relics",
   GALAXIES: "galaxies",
-  GALAXY_STAR_LINKS: "galaxy_star_links",
+  GALAXY_NEWSLETTER_SUBSCRIPTIONS: "galaxy_newsletter_subscriptions", // New newsletter table
   ROLE_MAPS: "role_maps",
   GALAXY_MEMBERSHIPS: "galaxy_memberships",
   CONNECTIONS: "connections",
@@ -382,6 +403,5 @@ export const TABLE_NAMES = {
   GALAXY_ROOMS: "galaxy_rooms",
   MESSAGES: "messages",
   CONTENT_REPORTS: "content_reports",
-  AFFILIATE_LINKS: "affiliate_links",
   CONTENT_ASSOCIATIONS: "content_associations",
 } as const;

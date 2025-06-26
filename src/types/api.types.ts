@@ -4,11 +4,7 @@ export interface ApiResponse<T = unknown> {
   data?: T;
 }
 
-export interface RedirectData {
-  redirectTo?: string;
-}
-
-export interface AuthData extends RedirectData {
+export interface AuthData {
   user?: {
     id: string;
     email: string;
@@ -18,7 +14,7 @@ export interface AuthData extends RedirectData {
   requires_verification?: boolean;
 }
 
-export interface ValidationErrorData extends RedirectData {
+export interface ValidationErrorData {
   validationErrors?: Array<{
     code: string;
     message: string;
@@ -29,4 +25,3 @@ export interface ValidationErrorData extends RedirectData {
 // Type-specific response interfaces
 export type AuthResponse = ApiResponse<AuthData>;
 export type ValidationErrorResponse = ApiResponse<ValidationErrorData>;
-export type RedirectResponse = ApiResponse<RedirectData>;

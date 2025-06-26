@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS loomers (
     dob DATE,
     location VARCHAR(255),
     avatar TEXT NOT NULL DEFAULT 'default-avatar.png',
+    banner TEXT, -- New banner field for loomer
     role user_role DEFAULT 'time',
     onboarding_completed BOOLEAN DEFAULT FALSE,
     is_verified BOOLEAN DEFAULT FALSE,
@@ -105,14 +106,6 @@ CREATE TABLE IF NOT EXISTS loomers (
     vectors vector(384), -- pgvector for AI search
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- User Social Links (normalized, no platform field)
-CREATE TABLE IF NOT EXISTS user_social_links (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES loomers(id) ON DELETE CASCADE,
-    url TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- User Powers/Achievements (normalized)
@@ -146,25 +139,13 @@ CREATE TABLE IF NOT EXISTS galaxies (
     visibility galaxy_visibility DEFAULT 'public',
     call_to_action_label VARCHAR(100),
     call_to_action_url TEXT,
+    newsletter_enabled BOOLEAN DEFAULT FALSE, -- Enable newsletter for this galaxy
+    newsletter_email VARCHAR(255), -- Email address for sending newsletters
+    newsletter_app_password TEXT, -- App password for email authentication
+    newsletter_content_threshold INTEGER DEFAULT 10, -- Send newsletter after X new contents
     vectors vector(384), -- pgvector for AI search
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Galaxy Star Links (normalized, no platform field)
-CREATE TABLE IF NOT EXISTS galaxy_star_links (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
-    url TEXT NOT NULL
-);
-
--- Role Maps for Galaxies
-CREATE TABLE IF NOT EXISTS role_maps (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
-    role VARCHAR(50) NOT NULL,
-    access_level access_level NOT NULL,
-    UNIQUE(galaxy_id, role)
 );
 
 -- Galaxy Memberships (Users in Galaxies)
@@ -175,8 +156,33 @@ CREATE TABLE IF NOT EXISTS galaxy_memberships (
     role VARCHAR(50) NOT NULL,
     reputation_title VARCHAR(100),
     reputation_score INTEGER DEFAULT 0,
+    newsletter_subscribed BOOLEAN DEFAULT FALSE, -- User newsletter subscription preference
     joined_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(user_id, galaxy_id)
+);
+
+-- Galaxy Newsletter Subscriptions (separate table for better management)
+CREATE TABLE IF NOT EXISTS galaxy_newsletter_subscriptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
+    loomer_ids UUID[], -- Array of subscribed loomer IDs
+    email_address VARCHAR(255) NOT NULL, -- Email address for sending
+    app_password TEXT NOT NULL, -- App password for email authentication
+    content_threshold INTEGER DEFAULT 10, -- Threshold for triggering newsletter
+    current_count INTEGER DEFAULT 0, -- Current count of new content since last newsletter
+    last_sent_at TIMESTAMPTZ, -- When was the last newsletter sent
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(galaxy_id)
+);
+
+-- Role Maps for Galaxies
+CREATE TABLE IF NOT EXISTS role_maps (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE,
+    role VARCHAR(50) NOT NULL,
+    access_level access_level NOT NULL,
+    UNIQUE(galaxy_id, role)
 );
 
 -- User Connections (Social Graph)
@@ -226,7 +232,9 @@ CREATE TABLE IF NOT EXISTS devs (
 CREATE TABLE IF NOT EXISTS pairs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     term TEXT NOT NULL,
-    definition TEXT NOT NULL
+    definition TEXT NOT NULL,
+    options JSONB, -- Optional field for quiz options, required when spark type is 'quiz'
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Sparks (Interactive Content)
@@ -428,13 +436,7 @@ CREATE TABLE IF NOT EXISTS content_reports (
     reported_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Monetization (Affiliate Links)
-CREATE TABLE IF NOT EXISTS affiliate_links (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    loom_id UUID REFERENCES looms(id) ON DELETE CASCADE,
-    url TEXT NOT NULL,
-    added_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- Removed: Monetization (Affiliate Links) - now handled by star_links table
 
 -- Content Associations (Many-to-Many relationships between content)
 CREATE TABLE IF NOT EXISTS content_associations (
@@ -445,6 +447,23 @@ CREATE TABLE IF NOT EXISTS content_associations (
     target_id UUID NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(source_type, source_id, target_type, target_id)
+);
+
+-- Unified Star Links Table (replaces user_social_links, galaxy_star_links, affiliate_links)
+-- Created after all referenced tables to avoid circular dependencies
+CREATE TABLE IF NOT EXISTS star_links (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    loomer_id UUID REFERENCES loomers(id) ON DELETE CASCADE, -- Optional: for user social links
+    galaxy_id UUID REFERENCES galaxies(id) ON DELETE CASCADE, -- Optional: for galaxy star links  
+    loom_id UUID REFERENCES looms(id) ON DELETE CASCADE, -- Optional: for loom affiliate links
+    url TEXT NOT NULL,
+    label VARCHAR(100), -- Optional label for the link
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT check_single_reference CHECK (
+        (loomer_id IS NOT NULL AND galaxy_id IS NULL AND loom_id IS NULL) OR
+        (loomer_id IS NULL AND galaxy_id IS NOT NULL AND loom_id IS NULL) OR
+        (loomer_id IS NULL AND galaxy_id IS NULL AND loom_id IS NOT NULL)
+    )
 );
 
 -- Performance Indexes
@@ -519,6 +538,59 @@ CREATE INDEX IF NOT EXISTS idx_messages_room_id ON messages(room_id);
 CREATE INDEX IF NOT EXISTS idx_messages_connection_id ON messages(connection_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
 
+-- Additional Indexes for new features
+CREATE INDEX IF NOT EXISTS idx_star_links_loomer_id ON star_links(loomer_id) WHERE loomer_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_star_links_galaxy_id ON star_links(galaxy_id) WHERE galaxy_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_star_links_loom_id ON star_links(loom_id) WHERE loom_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_galaxy_newsletter_subscriptions_galaxy_id ON galaxy_newsletter_subscriptions(galaxy_id);
+
+-- Add newsletter_subscribed column if it doesn't exist (for existing databases)
+DO $$
+BEGIN
+    -- Add banner field to loomers if it doesn't exist
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'loomers' 
+        AND column_name = 'banner'
+    ) THEN
+        ALTER TABLE loomers ADD COLUMN banner TEXT;
+    END IF;
+
+    -- Add newsletter fields to galaxies if they don't exist
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'galaxies' 
+        AND column_name = 'newsletter_enabled'
+    ) THEN
+        ALTER TABLE galaxies ADD COLUMN newsletter_enabled BOOLEAN DEFAULT FALSE;
+        ALTER TABLE galaxies ADD COLUMN newsletter_email VARCHAR(255);
+        ALTER TABLE galaxies ADD COLUMN newsletter_app_password TEXT;
+        ALTER TABLE galaxies ADD COLUMN newsletter_content_threshold INTEGER DEFAULT 10;
+    END IF;
+
+    -- Add newsletter_subscribed to galaxy_memberships if it doesn't exist
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'galaxy_memberships' 
+        AND column_name = 'newsletter_subscribed'
+    ) THEN
+        ALTER TABLE galaxy_memberships ADD COLUMN newsletter_subscribed BOOLEAN DEFAULT FALSE;
+    END IF;
+
+    -- Add options field to pairs if it doesn't exist
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'pairs' 
+        AND column_name = 'options'
+    ) THEN
+        ALTER TABLE pairs ADD COLUMN options JSONB;
+    END IF;
+END $$;
+
+-- Create the index after ensuring the column exists
+CREATE INDEX IF NOT EXISTS idx_galaxy_memberships_newsletter_subscribed ON galaxy_memberships(user_id, galaxy_id) WHERE newsletter_subscribed = TRUE;
+CREATE INDEX IF NOT EXISTS idx_pairs_options ON pairs USING GIN(options) WHERE options IS NOT NULL;
+
 -- Functions for updating timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -558,6 +630,65 @@ BEGIN
     WHERE status = 'pending' AND expires_at < NOW();
 END;
 $$ LANGUAGE plpgsql;
+
+-- Function to validate quiz options
+CREATE OR REPLACE FUNCTION validate_spark_quiz_options()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if spark type is 'quiz' and has a pair_id
+    IF NEW.type = 'quiz' AND NEW.pair_id IS NOT NULL THEN
+        -- Check if the associated pair has options
+        IF NOT EXISTS (
+            SELECT 1 FROM pairs 
+            WHERE id = NEW.pair_id 
+            AND options IS NOT NULL 
+            AND jsonb_array_length(options) >= 2
+        ) THEN
+            RAISE EXCEPTION 'Quiz type sparks must have associated pairs with at least 2 options';
+        END IF;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger for spark validation
+DROP TRIGGER IF EXISTS validate_spark_quiz_trigger ON sparks;
+CREATE TRIGGER validate_spark_quiz_trigger
+    BEFORE INSERT OR UPDATE ON sparks
+    FOR EACH ROW
+    EXECUTE FUNCTION validate_spark_quiz_options();
+
+-- Function to update newsletter content count
+CREATE OR REPLACE FUNCTION update_newsletter_content_count()
+RETURNS TRIGGER AS $$
+DECLARE
+    content_galaxy_id UUID;
+BEGIN
+    -- Determine galaxy_id based on content type
+    content_galaxy_id := NULL;
+    
+    -- You can extend this logic based on how content is associated with galaxies
+    -- For now, we'll assume there's a galaxy_id field or similar association
+    
+    IF content_galaxy_id IS NOT NULL THEN
+        -- Update the content count for newsletter
+        UPDATE galaxy_newsletter_subscriptions 
+        SET 
+            current_count = current_count + 1,
+            updated_at = NOW()
+        WHERE galaxy_id = content_galaxy_id;
+        
+        -- Check if threshold is reached and trigger newsletter if needed
+        -- This would typically be handled by a background job
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- You can add triggers for specific content types as needed
+-- Example: CREATE TRIGGER update_newsletter_count_looms AFTER INSERT ON looms FOR EACH ROW EXECUTE FUNCTION update_newsletter_content_count();
 
 -- ============================================================================
 -- END OF SCHEMA - Functions are in separate files under /supabase/functions/

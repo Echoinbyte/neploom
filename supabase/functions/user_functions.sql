@@ -5,10 +5,13 @@
 CREATE OR REPLACE FUNCTION update_user_profile(
   p_user_id UUID,
   p_bio TEXT DEFAULT NULL,
+  p_dob DATE DEFAULT NULL,
   p_location TEXT DEFAULT NULL,
   p_avatar TEXT DEFAULT NULL,
+  p_banner TEXT DEFAULT NULL,
   p_interests TEXT[] DEFAULT NULL,
-  p_dislikes TEXT[] DEFAULT NULL
+  p_dislikes TEXT[] DEFAULT NULL,
+  p_vectors vector(384) DEFAULT NULL
 ) RETURNS JSON AS $$
 DECLARE
   v_result JSON;
@@ -25,10 +28,13 @@ BEGIN
   UPDATE loomers
   SET 
     bio = COALESCE(p_bio, bio),
+    dob = COALESCE(p_dob, dob),
     location = COALESCE(p_location, location),
     avatar = COALESCE(p_avatar, avatar),
+    banner = COALESCE(p_banner, banner),
     interests = COALESCE(p_interests, interests),
     dislikes = COALESCE(p_dislikes, dislikes),
+    vectors = COALESCE(p_vectors, vectors),
     updated_at = NOW()
   WHERE id = p_user_id;
 
@@ -41,8 +47,10 @@ BEGIN
       'loomer_name', loomer_name,
       'hash_id', hash_id,
       'avatar', avatar,
+      'banner', banner,
       'role', role,
       'bio', bio,
+      'dob', dob,
       'location', location,
       'interests', interests,
       'dislikes', dislikes,
@@ -52,6 +60,8 @@ BEGIN
       'level', level,
       'xp', xp,
       'aura', aura,
+      'vectors', vectors,
+      'created_at', created_at,
       'updated_at', updated_at
     ),
     'message', 'Profile updated successfully'
@@ -73,9 +83,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE FUNCTION complete_onboarding(
   p_user_id UUID,
   p_bio TEXT DEFAULT NULL,
+  p_dob DATE DEFAULT NULL,
+  p_location VARCHAR(255) DEFAULT NULL,
+  p_role user_role DEFAULT NULL,
+  p_avatar TEXT DEFAULT NULL,
   p_interests TEXT[] DEFAULT NULL,
   p_dislikes TEXT[] DEFAULT NULL,
-  p_avatar TEXT DEFAULT NULL
+  p_vectors vector(384) DEFAULT NULL
 ) RETURNS JSON AS $$
 DECLARE
   v_result JSON;
@@ -92,9 +106,13 @@ BEGIN
   UPDATE loomers
   SET 
     bio = COALESCE(p_bio, bio),
+    dob = COALESCE(p_dob, dob),
+    location = COALESCE(p_location, location),
+    role = COALESCE(p_role, role),
     interests = COALESCE(p_interests, interests),
     dislikes = COALESCE(p_dislikes, dislikes),
     avatar = COALESCE(p_avatar, avatar),
+    vectors = COALESCE(p_vectors, vectors),
     onboarding_completed = true,
     updated_at = NOW()
   WHERE id = p_user_id;
@@ -108,8 +126,10 @@ BEGIN
       'loomer_name', loomer_name,
       'hash_id', hash_id,
       'avatar', avatar,
+      'banner', banner,
       'role', role,
       'bio', bio,
+      'dob', dob,
       'location', location,
       'interests', interests,
       'dislikes', dislikes,
@@ -118,7 +138,10 @@ BEGIN
       'stardust', stardust,
       'level', level,
       'xp', xp,
-      'aura', aura
+      'aura', aura,
+      'vectors', vectors,
+      'created_at', created_at,
+      'updated_at', updated_at
     ),
     'message', 'Onboarding completed successfully'
   ) INTO v_result
@@ -191,10 +214,10 @@ BEGIN
   FROM galaxy_memberships 
   WHERE user_id = p_user_id;
 
-  -- Get social links
-  SELECT COALESCE(json_agg(json_build_object('id', id, 'url', url)), '[]'::json) INTO v_social_links
-  FROM user_social_links
-  WHERE user_id = p_user_id;
+  -- Get social links (from unified star_links table)
+  SELECT COALESCE(json_agg(json_build_object('id', id, 'url', url, 'label', label)), '[]'::json) INTO v_social_links
+  FROM star_links
+  WHERE loomer_id = p_user_id;
 
   -- Get powers
   SELECT COALESCE(json_agg(json_build_object('id', id, 'name', name, 'acquired_at', acquired_at)), '[]'::json) INTO v_powers
@@ -215,7 +238,9 @@ BEGIN
       'hash_id', v_user.hash_id,
       'email', v_user.email,
       'avatar', v_user.avatar,
+      'banner', v_user.banner,
       'bio', v_user.bio,
+      'dob', v_user.dob,
       'location', v_user.location,
       'role', v_user.role,
       'stardust', v_user.stardust,
@@ -224,9 +249,11 @@ BEGIN
       'aura', v_user.aura,
       'interests', v_user.interests,
       'dislikes', v_user.dislikes,
+      'vectors', v_user.vectors,
       'is_verified', v_user.is_verified,
       'onboarding_completed', v_user.onboarding_completed,
       'created_at', v_user.created_at,
+      'updated_at', v_user.updated_at,
       'stats', json_build_object(
         'content', json_build_object(
           'looms', v_looms_count,
@@ -475,10 +502,11 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Function to add social link
+-- Function to add social link (updated to use star_links table)
 CREATE OR REPLACE FUNCTION add_user_social_link(
   p_user_id UUID,
-  p_url TEXT
+  p_url TEXT,
+  p_label TEXT DEFAULT NULL
 ) RETURNS JSON AS $$
 DECLARE
   v_link_id UUID;
@@ -491,9 +519,9 @@ BEGIN
     );
   END IF;
 
-  -- Insert social link
-  INSERT INTO user_social_links (user_id, url)
-  VALUES (p_user_id, p_url)
+  -- Insert social link into unified star_links table
+  INSERT INTO star_links (loomer_id, url, label)
+  VALUES (p_user_id, p_url, p_label)
   RETURNING id INTO v_link_id;
 
   RETURN json_build_object(
@@ -517,9 +545,9 @@ CREATE OR REPLACE FUNCTION remove_user_social_link(
   p_link_id UUID
 ) RETURNS JSON AS $$
 BEGIN
-  -- Delete social link (only if it belongs to the user)
-  DELETE FROM user_social_links
-  WHERE id = p_link_id AND user_id = p_user_id;
+  -- Delete social link (only if it belongs to the user) from unified star_links table
+  DELETE FROM star_links
+  WHERE id = p_link_id AND loomer_id = p_user_id;
 
   IF NOT FOUND THEN
     RETURN json_build_object(
@@ -531,6 +559,192 @@ BEGIN
   RETURN json_build_object(
     'success', true,
     'message', 'Social link removed successfully'
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', SQLERRM
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to add a star link (unified function for all types)
+CREATE OR REPLACE FUNCTION add_star_link(
+  p_url TEXT,
+  p_loomer_id UUID DEFAULT NULL,
+  p_galaxy_id UUID DEFAULT NULL,
+  p_loom_id UUID DEFAULT NULL,
+  p_label TEXT DEFAULT NULL
+) RETURNS JSON AS $$
+DECLARE
+  v_link_id UUID;
+BEGIN
+  -- Validate that exactly one reference ID is provided
+  IF (p_loomer_id IS NOT NULL)::INTEGER + 
+     (p_galaxy_id IS NOT NULL)::INTEGER + 
+     (p_loom_id IS NOT NULL)::INTEGER != 1 THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'Exactly one reference ID (loomer_id, galaxy_id, or loom_id) must be provided'
+    );
+  END IF;
+
+  -- Validate that the referenced entity exists
+  IF p_loomer_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM loomers WHERE id = p_loomer_id) THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'Loomer not found'
+    );
+  END IF;
+
+  IF p_galaxy_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM galaxies WHERE id = p_galaxy_id) THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'Galaxy not found'
+    );
+  END IF;
+
+  IF p_loom_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM looms WHERE id = p_loom_id) THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'Loom not found'
+    );
+  END IF;
+
+  -- Insert the star link
+  INSERT INTO star_links (loomer_id, galaxy_id, loom_id, url, label)
+  VALUES (p_loomer_id, p_galaxy_id, p_loom_id, p_url, p_label)
+  RETURNING id INTO v_link_id;
+
+  RETURN json_build_object(
+    'success', true,
+    'link_id', v_link_id,
+    'message', 'Star link added successfully'
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', SQLERRM
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to remove a star link
+CREATE OR REPLACE FUNCTION remove_star_link(
+  p_link_id UUID,
+  p_user_id UUID -- User requesting the removal (for permission check)
+) RETURNS JSON AS $$
+DECLARE
+  v_link RECORD;
+BEGIN
+  -- Get the star link details
+  SELECT * INTO v_link
+  FROM star_links
+  WHERE id = p_link_id;
+
+  IF NOT FOUND THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'Star link not found'
+    );
+  END IF;
+
+  -- Check permissions based on the type of link
+  IF v_link.loomer_id IS NOT NULL THEN
+    -- User social link - only the user can remove it
+    IF v_link.loomer_id != p_user_id THEN
+      RETURN json_build_object(
+        'success', false,
+        'error', 'You can only remove your own social links'
+      );
+    END IF;
+  ELSIF v_link.galaxy_id IS NOT NULL THEN
+    -- Galaxy star link - check if user has admin permission
+    IF NOT EXISTS (
+      SELECT 1 FROM galaxy_memberships gm
+      JOIN role_maps rm ON gm.galaxy_id = rm.galaxy_id AND gm.role = rm.role
+      WHERE gm.user_id = p_user_id 
+      AND gm.galaxy_id = v_link.galaxy_id
+      AND rm.access_level IN ('creator', 'admin')
+    ) THEN
+      RETURN json_build_object(
+        'success', false,
+        'error', 'Insufficient permissions to remove galaxy star link'
+      );
+    END IF;
+  ELSIF v_link.loom_id IS NOT NULL THEN
+    -- Loom affiliate link - check if user owns the loom
+    IF NOT EXISTS (
+      SELECT 1 FROM looms
+      WHERE id = v_link.loom_id AND creator_id = p_user_id
+    ) THEN
+      RETURN json_build_object(
+        'success', false,
+        'error', 'You can only remove affiliate links from your own looms'
+      );
+    END IF;
+  END IF;
+
+  -- Remove the star link
+  DELETE FROM star_links WHERE id = p_link_id;
+
+  RETURN json_build_object(
+    'success', true,
+    'message', 'Star link removed successfully'
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', SQLERRM
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get star links for an entity
+CREATE OR REPLACE FUNCTION get_star_links(
+  p_loomer_id UUID DEFAULT NULL,
+  p_galaxy_id UUID DEFAULT NULL,
+  p_loom_id UUID DEFAULT NULL
+) RETURNS JSON AS $$
+DECLARE
+  v_star_links JSONB;
+BEGIN
+  -- Validate that exactly one reference ID is provided
+  IF (p_loomer_id IS NOT NULL)::INTEGER + 
+     (p_galaxy_id IS NOT NULL)::INTEGER + 
+     (p_loom_id IS NOT NULL)::INTEGER != 1 THEN
+    RETURN json_build_object(
+      'success', false,
+      'error', 'Exactly one reference ID (loomer_id, galaxy_id, or loom_id) must be provided'
+    );
+  END IF;
+
+  -- Get star links
+  SELECT COALESCE(
+    json_agg(
+      json_build_object(
+        'id', id,
+        'url', url,
+        'label', label,
+        'created_at', created_at
+      )
+    ), 
+    '[]'::json
+  ) INTO v_star_links
+  FROM star_links
+  WHERE (p_loomer_id IS NULL OR loomer_id = p_loomer_id)
+    AND (p_galaxy_id IS NULL OR galaxy_id = p_galaxy_id)
+    AND (p_loom_id IS NULL OR loom_id = p_loom_id);
+
+  RETURN json_build_object(
+    'success', true,
+    'star_links', v_star_links
   );
 
 EXCEPTION

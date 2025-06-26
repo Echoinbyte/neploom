@@ -207,7 +207,12 @@ export interface VectorSearchResult<T> {
 
 // Join Types (for complex queries with relations)
 export interface LoomerWithRelations extends Loomer {
-  social_links?: Array<{ url: string }>;
+  star_links?: Array<{
+    id: string;
+    url: string;
+    label?: string;
+    created_at: Date;
+  }>;
   powers?: Array<{ name: string; acquired_at: Date }>;
   relics?: Array<{ asset_id: string; name?: string }>;
   galaxy_memberships?: Array<{
@@ -247,7 +252,12 @@ export interface LoomWithRelations extends Loom {
   dev_content?: Dev;
   likes_count?: number;
   comments_count?: number;
-  affiliate_links?: Array<{ url: string }>;
+  star_links?: Array<{
+    id: string;
+    url: string;
+    label?: string;
+    created_at: Date;
+  }>;
 }
 
 export interface ContentWithCreator {

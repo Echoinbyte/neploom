@@ -70,7 +70,6 @@ export const authOptions: NextAuthOptions = {
             email: data.user.email,
             name: data.user.loomer_name,
             image: data.user.avatar,
-            // Convert snake_case to camelCase for consistency
             hashId: data.user.hash_id,
             loomerName: data.user.loomer_name,
             isVerified: data.user.is_verified,
