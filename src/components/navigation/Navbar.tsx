@@ -22,6 +22,7 @@ import useKeyboardNavigation from "@/hooks/use-keyboard-navigation";
 const Navbar = () => {
   const { loomer } = useLoomer();
   const [menuVisible, setMenuVisible] = useState(false);
+  console.log(loomer);
 
   const menuWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -116,7 +117,7 @@ const Navbar = () => {
                     <span
                       className={cn(
                         loomer?.isVerified ? "flex" : "hidden",
-                        "lg:flex h-6 w-px bg-gray-200"
+                        "lg:flex h-6 w-px bg-muted"
                       )}
                       aria-hidden="true"
                     />

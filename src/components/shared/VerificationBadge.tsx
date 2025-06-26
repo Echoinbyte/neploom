@@ -45,7 +45,7 @@ function VerificationBadge({
   tooltip,
   sizeOfLogo,
 }: VerificationBadgeProps) {
-  const loomerAura = loomer?.profile?.stats?.aura || 0;
+  const loomerAura = loomer?.aura || 0;
 
   // Calculate the appropriate badge based on aura - memoized for performance
   const loomerBadge = useMemo(() => {

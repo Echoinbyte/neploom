@@ -26,7 +26,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TbDeviceDesktopStar } from "react-icons/tb";
 import { TbPencilStar } from "react-icons/tb";
 import useLoomer from "@/hooks/use-loomer";
-import { FaRegBookmark } from "react-icons/fa6";
 import { GoScreenFull, GoScreenNormal } from "react-icons/go";
 import VerificationBadge from "@/components/shared/VerificationBadge";
 import { ImFeed } from "react-icons/im";
@@ -120,52 +119,40 @@ const LoomerAccountMenu = () => {
                 href={`/admin`}
                 className="h-auto w-full flex flex-row items-center gap-2 cursor-pointer"
               >
-                <TbDeviceDesktopStar className="text-skin-base-600 dark:text-skin-base-500" />{" "}
+                <TbDeviceDesktopStar className="text-primary/80 hover:text-primary" />{" "}
                 Admin
               </Link>
             </DropdownMenuItem>
           ) : null}
 
-          {role === "admin" || role === "author" ? (
-            <DropdownMenuItem asChild>
-              <Link
-                href={`/author`}
-                className="h-auto w-full flex flex-row items-center gap-2 cursor-pointer"
-              >
-                <TbPencilStar className="text-skin-base-600 dark:text-skin-base-500" />{" "}
-                Author
-              </Link>
-            </DropdownMenuItem>
-          ) : null}
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/nepler`}
+              className="h-auto w-full flex flex-row items-center gap-2 cursor-pointer"
+            >
+              <TbPencilStar className="text-primary/80 hover:text-primary" />{" "}
+              Nepler
+            </Link>
+          </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
             <Link
               href={`/feed`}
               className="h-auto w-full flex flex-row items-center gap-2 cursor-pointer"
             >
-              <ImFeed className="text-skin-base-600 dark:text-skin-base-500" />{" "}
-              Feed
+              <ImFeed className="text-primary/80 hover:text-primary" /> Feed
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
-            <Link
-              href={`/feed/favourites`}
-              className="h-auto w-full flex flex-row items-center gap-2 cursor-pointer"
-            >
-              <FaRegBookmark className="text-skin-base-600 dark:text-skin-base-500" />{" "}
-              Favourites
-            </Link>
-          </DropdownMenuItem>
           <DropdownMenuSeparator />
 
           <DropdownMenuItem asChild>
             <div onClick={toggleFullscreen}>
               <div className="hidden sm:flex h-auto w-full flex-row items-center gap-2 cursor-pointer">
                 {isFullscreen ? (
-                  <GoScreenNormal className="text-skin-base-600 dark:text-skin-base-500" />
+                  <GoScreenNormal className="text-primary/80 hover:text-primary" />
                 ) : (
-                  <GoScreenFull className="text-skin-base-600 dark:text-skin-base-500" />
+                  <GoScreenFull className="text-primary/80 hover:text-primary" />
                 )}
                 {isFullscreen ? "Exit Fullscreen" : "Go Fullscreen"}
               </div>
@@ -177,7 +164,7 @@ const LoomerAccountMenu = () => {
             <DialogTrigger asChild>
               <Button
                 variant="outline"
-                className="cursor-pointer text-skin-base-600 dark:text-skin-base-500 w-full border-none"
+                className="cursor-pointer text-primary/80 hover:text-primary  w-full border-none"
               >
                 Logout
               </Button>

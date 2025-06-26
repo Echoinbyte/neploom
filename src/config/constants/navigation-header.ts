@@ -30,16 +30,15 @@ export const CREATION_CATEGORIES = [
 ];
 
 export const DEFAULT_LOOMER_DATA: Loomer = {
+  id: "",
   loomerName: "Guest",
   hashId: "00000000",
-  email: "guest@example.com",
   avatar: "/placeholder-loomer.jpg",
   role: "guest",
   onboardingCompleted: false,
-  profile: {
-    stats: {
-      aura: 0,
-    },
-  },
+  stardust: 0,
+  aura: 0,
+  level: 0,
+  xp: 0,
   isVerified: false,
 };

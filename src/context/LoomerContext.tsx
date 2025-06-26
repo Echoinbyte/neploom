@@ -53,8 +53,9 @@ const LoomerProvider = ({ children }: LoomerProviderProps) => {
   useEffect(() => {
     setLoading(true);
     if (status === "authenticated" && session?.user) {
-      const { hashId } = session.user as { hashId: string };
-      fetchLoomerData(hashId);
+      setLoomer(session?.user)
+      // const { hashId } = session.user as { hashId: string };
+      // fetchLoomerData(hashId);
     } else {
       const localLoomer = JSON.parse(localStorage.getItem("loomer") || "null");
       if (localLoomer) {
