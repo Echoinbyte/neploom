@@ -268,6 +268,8 @@ This project is a unique collaboration between human ingenuity and artificial in
 *   **AI**: My partner in creation. The AI has been instrumental in:
     *   **Copywriting**: Generating and refining the text you're reading in this `README.md`, `JOURNEY.md` and other documents.
     *   **Asset Generation**: Creating some of the initial visual assets for the project.
+    *   **Database Engineering**: Implementing robust Supabase functions for authentication, verification, user management, and security features.
+    *   **Backend Architecture**: Contributing to database schema optimization.
 
 We believe this human-AI partnership represents the future of creative and technical work.
 
